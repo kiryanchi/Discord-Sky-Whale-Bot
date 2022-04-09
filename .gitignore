@@ -1,0 +1,11 @@
+__pycache__/
+.env
+.python-version
+.git
+token
+
+# Test Files
+test.py
+
+# DB 
+*.db
