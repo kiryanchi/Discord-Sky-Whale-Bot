@@ -1,12 +1,14 @@
 import discord
-import asyncio
+from db import DB
 from discord.ext import commands, tasks
 from itertools import cycle
 import os
 
 TOKEN = open("token", "r").readline()
-GAME_LIST = cycle(['재획', '유튜브 검색', '일', '모교는'])
-bot = commands.Bot(command_prefix='.')
+GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
+db = DB("muple.db")
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=".", intents=intents)
 
 for filename in os.listdir("Cogs"):
     if filename.endswith(".py"):
@@ -19,10 +21,22 @@ async def on_ready():
     async def change_game():
         await bot.change_presence(activity=discord.Game(next(GAME_LIST)))
 
-    print('MusicpleStory Bot Activate')
+    print("MusicpleStory Bot Activate")
     print(f"bot name: {bot.user.name}")
-    print('--------------------------')
+    print("--------------------------")
     change_game.start()
+
+
+@bot.event
+async def on_guild_join(guild):
+    db.insert("server", f"{guild.id}")
+    print(f"{guild.id} 서버 추가 완료")
+
+
+@bot.event
+async def on_guild_remove(guild):
+    # TODO: guild 탈퇴하면 db에서 server id 와 관련된 모든 데이터 삭제
+    pass
 
 
 @bot.command(name="로드")
@@ -51,5 +65,5 @@ async def reload_commands(ctx, extension=None):
         await ctx.send(f":white_check_mark: {extension}을(를) 다시 불러왔습니다!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bot.run(TOKEN)
