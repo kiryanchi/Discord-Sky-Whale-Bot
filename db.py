@@ -2,10 +2,16 @@ import sqlite3
 
 
 class DB:
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "_instance"):
+            print("DB 연결 됨")
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self):
         self.con = sqlite3.connect("muple.db")
         self.cursor = self.con.cursor()
-        print("DB 연결 됨")
+        print("싱글 톤 DB 연결 됨")
 
     def save(self, query_string, param=None):
         if param:
