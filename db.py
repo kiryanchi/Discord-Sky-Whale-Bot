@@ -5,6 +5,7 @@ class DB:
     def __init__(self):
         self.con = sqlite3.connect("muple.db")
         self.cursor = self.con.cursor()
+        print("DB 연결 됨")
 
     def save(self, query_string, param=None):
         if param:
@@ -15,6 +16,7 @@ class DB:
 
     def close(self):
         self.con.close()
+        print("DB 성공적으로 해제 됨")
 
     def insert_music_channel(
         self, server_id, channel_id, user_id, playlist_id, button_id
