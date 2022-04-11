@@ -2,51 +2,30 @@ import sqlite3
 
 
 class DB:
-    def __init__(self, db):
-        self.con = sqlite3.connect(db)
+    def __init__(self):
+        self.con = sqlite3.connect("muple.db")
         self.cursor = self.con.cursor()
 
-    def init(self):
-        self.cursor.execute("CREATE TABLE server(ID int)")
-        self.cursor.execute(
-            "CREATE TABLE muisc(ID int, Chanel int, \
-                PlayList int, Player int, Button int)"
-        )
+    def save(self, query_string, param=None):
+        if param:
+            self.cursor.execute(query_string, param)
+        else:
+            self.cursor.execute(query_string)
+        self.con.commit()
 
     def close(self):
         self.con.close()
 
-    def insert(self, table, *values):
-        try:
-            assert len(values) > 0, "VALUES 값이 필요합니다."
+    def insert_music_channel(
+        self, server_id, channel_id, user_id, playlist_id, button_id
+    ):
+        query_string = f"INSERT INTO music_channel VALUES ({server_id}, {channel_id}, {user_id}, {playlist_id}, {button_id})"
+        self.save(query_string)
 
-            if table == "music":
-                assert (
-                    len(values) == 5
-                ), "music 테이블은 id, channel, playlist, player, button이 필요합니다."
-            elif table == "server":
-                assert len(values) == 1, "server 테이블은 id이 필요합니다."
-            else:
-                assert table == "music" or table == "server", f"{table}은 존재하지 않습니다."
-        except AssertionError as e:
-            print(e)
-        else:
-            items = " ".join(values)
-            query_string = f"INSERT INTO {table} VALUES ({items})"
-            self.cursor.execute(query_string)
-            self.con.commit()
+    def is_exist_music_channel(self, server_id):
+        query_string = "SELECT id FROM music_channel WHERE server_id='%s'" % server_id
+        self.save(query_string)
 
-    def fetch(self, table, *values):
-        try:
-            assert len(values) > 0, "VALUES 값이 필요합니다."
-            assert table == "music" or table == "server", f"{table}은 존재하지 않습니다."
-        except AssertionError as e:
-            print(e)
-        else:
-            self.cursor.execute(f"SELECT {values} FROM {table}")
-
-    def insert_server(self, id):
-        self.cursor.execute(f"INSERT INTO server VALUES({id})")
-
-    def disconnect(self):
-        self.con.close()
+    def delete_music_channel(self, server_id):
+        query_string = "DELETE FROM music_channel WHERE server_id='%s'" % server_id
+        self.save(query_string)
