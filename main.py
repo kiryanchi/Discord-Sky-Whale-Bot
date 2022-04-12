@@ -1,14 +1,16 @@
 import discord
 from db import DB
 from discord.ext import commands, tasks
+from discord_components import ComponentsBot
 from itertools import cycle
 import os
 
 TOKEN = open("token", "r").readline()
 GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
-db = DB("muple.db")
+
+db = DB()
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix=".", intents=intents)
+bot = ComponentsBot(command_prefix=".", intents=intents)
 
 for filename in os.listdir("Cogs"):
     if filename.endswith(".py"):
@@ -28,15 +30,24 @@ async def on_ready():
 
 
 @bot.event
-async def on_guild_join(guild):
-    db.insert("server", f"{guild.id}")
-    print(f"{guild.id} 서버 추가 완료")
-
-
-@bot.event
 async def on_guild_remove(guild):
     # TODO: guild 탈퇴하면 db에서 server id 와 관련된 모든 데이터 삭제
     pass
+
+
+@bot.event
+async def on_message(message):
+    # 봇이면 종료
+    if message.author == bot.user:
+        return
+
+    music_channel_data = db.select_music_channel(message.guild.id)
+    if music_channel_data and music_channel_data[0][1] == message.channel.id:
+        if message.content.startswith("."):
+            return
+
+    if message.content.startswith("."):
+        await bot.process_commands(message)
 
 
 @bot.command(name="로드")
@@ -67,3 +78,4 @@ async def reload_commands(ctx, extension=None):
 
 if __name__ == "__main__":
     bot.run(TOKEN)
+    db.close()
