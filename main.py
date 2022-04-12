@@ -78,12 +78,13 @@ async def reload_commands(ctx, extension=None):
         await ctx.send(f":white_check_mark: {extension}을(를) 다시 불러왔습니다!")
 
 
-@load_commands.error
-@unload_commands.error
-@reload_commands.error
-async def commadns_error(ctx, error):
+@bot.event
+async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.reply("권한이 없어요 ㅜㅜ", mention_author=True)
+        await ctx.reply("권한이 없어요", mention_author=True)
+
+    if isinstance(error, commands.CommandNotFound):
+        return
 
 
 if __name__ == "__main__":
