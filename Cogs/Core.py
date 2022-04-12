@@ -7,9 +7,13 @@ class Core(commands.Cog):
         super().__init__()
         self.app = app
 
-    @commands.command(name='클리어')
+    @commands.command(name="클리어")
     async def clear(self, ctx):
         await ctx.channel.purge()
+
+    @commands.command(name="핑")
+    async def ping(self, ctx):
+        await ctx.send("pong")
 
 
 def setup(app):
