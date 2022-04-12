@@ -1,7 +1,6 @@
 import discord
 from db import DB
-from discord.ext import tasks
-from discord_components import ComponentsBot
+from discord.ext import commands, tasks
 from itertools import cycle
 import os
 
@@ -10,7 +9,7 @@ GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
 
 db = DB()
 intents = discord.Intents.all()
-bot = ComponentsBot(command_prefix=".", intents=intents)
+bot = commands.Bot(command_prefix=".", intents=intents)
 
 for filename in os.listdir("Cogs"):
     if filename.endswith(".py"):
@@ -51,18 +50,21 @@ async def on_message(message):
 
 
 @bot.command(name="로드")
+@commands.has_permissions(administrator=True)
 async def load_commands(ctx, extension):
     bot.load_extension(f"Cogs.{extension}")
     await ctx.send(f":white_check_mark: {extension}을(를) 로드했습니다.")
 
 
 @bot.command(name="언로드")
+@commands.has_permissions(administrator=True)
 async def unload_commands(ctx, extension):
     bot.unload_extension(f"Cogs.{extension}")
     await ctx.send(f":white_check_mark: {extension}을(를) 언로드했습니다.")
 
 
 @bot.command(name="리로드")
+@commands.has_permissions(administrator=True)
 async def reload_commands(ctx, extension=None):
     if extension is None:
         for filename in os.listdir("Cogs"):
@@ -74,6 +76,14 @@ async def reload_commands(ctx, extension=None):
         bot.unload_extension(f"Cogs.{extension}")
         bot.load_extension(f"Cogs.{extension}")
         await ctx.send(f":white_check_mark: {extension}을(를) 다시 불러왔습니다!")
+
+
+@load_commands.error
+@unload_commands.error
+@reload_commands.error
+async def commadns_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.reply("권한이 없어요 ㅜㅜ", mention_author=True)
 
 
 if __name__ == "__main__":
