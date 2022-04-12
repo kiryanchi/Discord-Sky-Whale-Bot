@@ -4,6 +4,7 @@ import sqlite3
 class DB:
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "_instance"):
+            print("DB 연결 됨")
             cls._instance = super().__new__(cls)
         return cls._instance
 
