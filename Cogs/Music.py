@@ -4,6 +4,18 @@ from discord.ext import commands
 from discord_components import DiscordComponents, Button, ButtonStyle
 from db import DB
 
+from youtubesearchpython import VideosSearch
+import youtube_dl
+
+
+class Youtube:
+    def __init__(self):
+        self.YDL_OPTS = {"foramt": "bestaudio", "quiet": True}
+        self.NUM_OF_SEARCH = 9
+
+    def search_music(self, amount):
+        pass
+
 
 class Music(commands.Cog):
     def __init__(self, app):
@@ -11,14 +23,19 @@ class Music(commands.Cog):
         super().__init__()
         self.app = app
         self.db = DB()
-        self.BUTTON_COMPONENTS = [
-            [
-                Button(style=ButtonStyle.green, label="Skip"),
-                Button(style=ButtonStyle.grey, label="Shuffle"),
-                Button(style=ButtonStyle.red, label="Pause"),
-                Button(style=ButtonStyle.grey, label="사용법"),
-            ]
-        ]
+
+    def _make_player_embed(self, song_info=None):
+        if song_info:
+            embed = discord.Embed(
+                title="현재 재생 중인 곡", description=song_info["title"], color=0xB18CFE
+            )
+            embed.set_image(url=song_info["thumbnail"])
+            embed.set_footer(text="채팅을 치면 자동으로 검색합니다.")
+        else:
+            embed = discord.Embed(title="현재 재생 중 아님", color=0xB18CFE)
+            embed.set_image(url="")
+            embed.set_footer(text="채팅을 치면 자동으로 검색합니다.")
+        return embed
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -78,26 +95,28 @@ class Music(commands.Cog):
         button = await ctx.send("버튼")
 
         player_embed = self._make_player_embed()
-        await playlist.edit("현재 재생목록이 비어있음", embed=player_embed)
-
-        await button.edit(" ", components=self.BUTTON_COMPONENTS)
+        await playlist.edit(
+            "현재 재생목록이 비어있음",
+            embed=player_embed,
+            components=[
+                [
+                    Button(style=ButtonStyle.red, label="||"),
+                    Button(style=ButtonStyle.green, label="▷"),
+                    Button(style=ButtonStyle.blue, label="↻"),
+                    Button(style=ButtonStyle.grey, label="?"),
+                ],
+                [
+                    Button(style=ButtonStyle.grey, label="<"),
+                    Button(style=ButtonStyle.grey, label=">"),
+                    Button(style=ButtonStyle.grey, label="<<"),
+                    Button(style=ButtonStyle.grey, label=">>"),
+                ],
+            ],
+        )
 
         self.db.insert_music_channel(
             ctx.guild.id, ctx.channel.id, playlist.id, button.id
         )
-
-    def _make_player_embed(self, song_info=None):
-        if song_info:
-            embed = discord.Embed(
-                title="현재 재생 중인 곡", description=song_info["title"], color=0xB18CFE
-            )
-            embed.set_image(url=song_info["thumbnail"])
-            embed.set_footer(text="채팅을 치면 자동으로 검색합니다.")
-        else:
-            embed = discord.Embed(title="현재 재생 중 아님", color=0xB18CFE)
-            embed.set_image(url="")
-            embed.set_footer(text="채팅을 치면 자동으로 검색합니다.")
-        return embed
 
 
 def setup(app):
