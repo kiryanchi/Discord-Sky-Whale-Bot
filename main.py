@@ -1,6 +1,6 @@
 import discord
 from db import DB
-from discord.ext import commands, tasks
+from discord.ext import tasks
 from discord_components import ComponentsBot
 from itertools import cycle
 import os
