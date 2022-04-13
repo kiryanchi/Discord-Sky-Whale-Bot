@@ -28,27 +28,6 @@ async def on_ready():
     change_game.start()
 
 
-@bot.event
-async def on_guild_remove(guild):
-    # TODO: guild 탈퇴하면 db에서 server id 와 관련된 모든 데이터 삭제
-    pass
-
-
-@bot.event
-async def on_message(message):
-    # 봇이면 종료
-    if message.author == bot.user:
-        return
-
-    music_channel_data = db.select_music_channel(message.guild.id)
-    if music_channel_data and music_channel_data[0][1] == message.channel.id:
-        if message.content.startswith("."):
-            return
-
-    if message.content.startswith("."):
-        await bot.process_commands(message)
-
-
 @bot.command(name="로드")
 @commands.has_permissions(administrator=True)
 async def load_commands(ctx, extension):
@@ -84,7 +63,7 @@ async def on_command_error(ctx, error):
         await ctx.reply("권한이 없어요", mention_author=True)
 
     if isinstance(error, commands.CommandNotFound):
-        return
+        await ctx.reply("그런 명령어는 없어요", mention_author=True)
 
 
 if __name__ == "__main__":
