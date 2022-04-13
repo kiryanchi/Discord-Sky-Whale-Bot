@@ -34,8 +34,13 @@ async def on_ready():
 
 
 @bot.event
-async def on_message(msg):
-    return
+async def on_message(message):
+    if message.author == bot.user:
+        return
+
+    if message.content.startswith("."):
+        await bot.process_commands(message)
+        return
 
 
 @bot.command(name="로드")

@@ -17,18 +17,12 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.channel.id != 962232434613710878:
-            return
-
         if message.author == self.app.user:
-            return
-
-        if message.content.startswith("."):
-            await self.app.process_commands(message)
             return
 
         if message.author.voice is None:
             await message.channel.send("음성 채널에 들어가서 사용해주세요", delete_after=3)
+            await asyncio.sleep(3)
             return await message.delete()
 
         info = await self.app.loop.run_in_executor(
