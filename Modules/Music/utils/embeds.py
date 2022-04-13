@@ -19,15 +19,28 @@ class Embed:
 
     @staticmethod
     def playlist(song: Song, queue: Queue, thumbnail: str = URL) -> discord.Embed:
+        # TODO: 아직 미완성
         embed = (
             discord.Embed(title="\u2000" * 5 + "Sky Whale", color=COLOR)
-            .add_field(name=song.title, value=song., inline=False)
+            .add_field(name=song, value=song, inline=False)
             .set_thumbnail(url=thumbnail)
             .add_field(name="대기중인 곡", value=queue, inline=False)
             .set_footer(text="노래를 검색해서 추가하세요.")
         )
 
-        if song:
+        return embed
 
+    @staticmethod
+    def search(content, info):
+        embed = discord.Embed(title=f"{content} 검색 결과", color=COLOR).set_thumbnail(
+            url=URL
+        )
+
+        for i in range(len(info)):
+            embed.add_field(
+                name=f"{i+1:2d}번\t({info[i]['duration']}) {info[i]['channel']['name']}",
+                value=f"제목: {info[i]['title']}",
+                inline=False,
+            )
 
         return embed

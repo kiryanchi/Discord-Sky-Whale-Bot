@@ -4,6 +4,8 @@ from discord.ext import commands, tasks
 from itertools import cycle
 import os
 
+from Cogs.Music import Music
+
 TOKEN = open("token", "r").readline()
 GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
 
@@ -26,6 +28,14 @@ async def on_ready():
     print(f"bot name: {bot.user.name}")
     print("--------------------------")
     change_game.start()
+
+    channel = bot.get_channel(962232434613710878)
+    await Music._init_channel(channel)
+
+
+@bot.event
+async def on_message(msg):
+    return
 
 
 @bot.command(name="로드")
