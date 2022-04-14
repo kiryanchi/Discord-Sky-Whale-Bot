@@ -1,7 +1,6 @@
-import discord
 import asyncio
 from discord.ext import commands
-from discord_components import DiscordComponents, Button, ButtonStyle
+from discord_components import DiscordComponents
 
 from Modules.Music.utils.embeds import Embed
 from Modules.Music.utils.components import Components
@@ -13,6 +12,7 @@ from db import DB
 
 
 q = Queue()
+msg = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [35m향유[0m하기 시작했어요\n```"
 
 
 class Music(commands.Cog):
@@ -23,11 +23,26 @@ class Music(commands.Cog):
         self.db = DB()
 
     @commands.Cog.listener()
+    async def on_ready(self):
+        guilds = self.db.select_all_music_channel()
+
+        for guild in guilds:
+            _, channel_id = guild
+
+            channel = self.app.get_channel(channel_id)
+            await Music._init_channel(channel)
+
+        print("Music bot init done")
+
+    @commands.Cog.listener()
     async def on_message(self, message):
         if message.author == self.app.user:
             return
 
-        if message.channel.id == q[message.guild.id].get_channel_id():
+        if (
+            q[message.guild.id]
+            and message.channel.id == q[message.guild.id].get_channel_id()
+        ):
             if message.content == ".초기화":
                 await self.app.process_commands(message)
                 return
@@ -42,14 +57,10 @@ class Music(commands.Cog):
 
             if "youtube.com" in message.content:
                 # Yotube play
-                await message.channel.send("Youtube Search", delete_after=3)
+                await message.channel.send("youtube 주소 검색 기능은 구현중입니다..", delete_after=3)
 
             else:
-                info = await self.app.loop.run_in_executor(
-                    None, lambda: Youtube.search(message.content)
-                )
-                song = await Youtube.select(self.app, message, info)
-                song = Song(song)
+                song = await Youtube.search_and_select(self.app, message)
 
                 print(song)
 
@@ -78,18 +89,15 @@ class Music(commands.Cog):
     @staticmethod
     async def _init_channel(channel):
         await channel.purge()
-        await channel.send("하늘고래가 이곳을 향유하기 시작했어요.")
+        playlist_msg = await channel.send(msg)
         await asyncio.sleep(2)
-        await channel.purge()
 
-        song = "> " + "{0:\u2000>30}".format("하늘고래")
-        queue = "> " + "{0:\u2000>30}".format("sky whale")
+        playlist = Playlist(channel=channel, playlist_msg=playlist_msg)
 
-        playlist_msg = await channel.send(
-            embed=Embed.playlist(song, queue), components=Components.playlist()
+        await playlist_msg.edit(
+            embed=Embed.playlist(playlist), components=Components.playlist()
         )
 
-        playlist = Playlist(channel=channel, playlist_msg=playlist_msg, vc=None)
         q[channel.guild.id] = playlist
 
 

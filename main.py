@@ -31,16 +31,6 @@ async def on_ready():
     print("--------------------------")
     change_game.start()
 
-    guilds = db.select_all_music_channel()
-
-    for guild in guilds:
-        _, channel_id = guild
-
-        channel = bot.get_channel(channel_id)
-        await Music._init_channel(channel)
-
-    print("Music bot init done")
-
 
 @bot.event
 async def on_message(message):
@@ -48,7 +38,10 @@ async def on_message(message):
         return
 
     # 음악 채널에 명령어를 사용하면 종료
-    if message.channel.id == q[message.guild.id].get_channel_id():
+    if (
+        q[message.guild.id]
+        and message.channel.id == q[message.guild.id].get_channel_id()
+    ):
         if message.content.startswith("."):
             return
 
