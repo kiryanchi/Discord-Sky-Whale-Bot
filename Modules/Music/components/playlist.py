@@ -60,9 +60,9 @@ class Playlist:
     async def _check_queue(self, song):
         if len(self.get_next_songs()) == 0:
             self.playing = False
-            await asyncio.sleep(30)
+            await asyncio.sleep(5)
             if self.playing is False:
-                self.leave()
+                await self.leave()
 
             return
         self.voice_client.stop()
