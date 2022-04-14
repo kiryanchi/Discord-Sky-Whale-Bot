@@ -9,7 +9,7 @@ class DB:
         return cls._instance
 
     def __init__(self):
-        self.con = sqlite3.connect("muple.db")
+        self.con = sqlite3.connect("sky_whale_bot.db")
         self.cursor = self.con.cursor()
 
     def update_query(self, query_string, param=None):
