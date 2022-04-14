@@ -1,4 +1,5 @@
 import discord
+import asyncio
 
 
 class Playlist:
@@ -13,7 +14,6 @@ class Playlist:
         self.voice_channel = None
         self.voice_client = None
         self.queue = {
-            "prev_song": None,
             "current_song": None,
             "next_songs": [],
         }
@@ -37,12 +37,6 @@ class Playlist:
     def add_next_song(self, song):
         self.queue["next_songs"].append(song)
 
-    def get_prev_song(self):
-        return self.queue["prev_song"]
-
-    def set_prev_song(self, song):
-        self.queue["prev_song"] = song
-
     def is_same_voice_channel(self, channel):
         return self.voice_channel == channel
 
@@ -58,10 +52,18 @@ class Playlist:
         self.voice_channel = channel
         await self.voice_client.move_to(self.voice_channel)
 
+    async def leave(self):
+        await self.voice_client.disconnect()
+        self.voice_channel = None
+        self.voice_client = None
+
     async def _check_queue(self, song):
-        self.set_prev_song(song)
-        if len(self.song_queue) == 0:
+        if len(self.get_next_songs()) == 0:
             self.playing = False
+            await asyncio.sleep(30)
+            if self.playing is False:
+                self.leave()
+
             return
         self.voice_client.stop()
         await self._play_song()
@@ -77,7 +79,9 @@ class Playlist:
         )
 
     async def play(self, message, song):
+        # 노래를 추가한다
         self.add_next_song(song)
+
         # 음성 채널에 연결되어 있지 않다면, 음성 채널에 입장
         if self.voice_client is None:
             await self.join(message.author.voice.channel)
