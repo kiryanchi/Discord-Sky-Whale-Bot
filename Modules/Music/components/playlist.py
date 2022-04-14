@@ -65,17 +65,17 @@ class Playlist:
         self.voice_client.stop()
         await self._play_song()
 
-    async def _play_song(self):
+    async def _play_song(self, app):
         song = self.get_next_song()
         self.playing = True
         self.voice_client.play(
             discord.PCMVolumeTransformer(
                 discord.FFmpegPCMAudio(song.mp3, **self.FFMPEG_OPTIONS)
             ),
-            after=lambda error: self.app.loop.create_task(self._check_queue(song)),
+            after=lambda error: app.loop.create_task(self._check_queue(song)),
         )
 
-    async def play(self, message, song):
+    async def play(self, app, message, song):
         self.add_next_song(song)
         # 음성 채널에 연결되어 있지 않다면, 음성 채널에 입장
         if self.voice_client is None:

@@ -12,28 +12,28 @@ GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
 db = DB()
 q = Queue()
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix=".", intents=intents)
+app = commands.Bot(command_prefix=".", intents=intents)
 
 for filename in os.listdir("Cogs"):
     if filename.endswith(".py"):
-        bot.load_extension(f"Cogs.{filename[:-3]}")
+        app.load_extension(f"Cogs.{filename[:-3]}")
 
 
-@bot.event
+@app.event
 async def on_ready():
     @tasks.loop(minutes=30)
     async def change_game():
-        await bot.change_presence(activity=discord.Game(next(GAME_LIST)))
+        await app.change_presence(activity=discord.Game(next(GAME_LIST)))
 
-    print("MusicpleStory Bot Activate")
-    print(f"bot name: {bot.user.name}")
+    print("MusicpleStory app Activate")
+    print(f"app name: {app.user.name}")
     print("--------------------------")
     change_game.start()
 
 
-@bot.event
+@app.event
 async def on_message(message):
-    if message.author == bot.user:
+    if message.author == app.user:
         return
 
     # 음악 채널에 명령어를 사용하면 종료
@@ -45,40 +45,40 @@ async def on_message(message):
             return
 
     if message.content.startswith("."):
-        await bot.process_commands(message)
+        await app.process_commands(message)
         return
 
 
-@bot.command(name="로드")
+@app.command(name="로드")
 @commands.has_permissions(administrator=True)
 async def load_commands(ctx, extension):
-    bot.load_extension(f"Cogs.{extension}")
+    app.load_extension(f"Cogs.{extension}")
     await ctx.send(f":white_check_mark: {extension}을(를) 로드했습니다.")
 
 
-@bot.command(name="언로드")
+@app.command(name="언로드")
 @commands.has_permissions(administrator=True)
 async def unload_commands(ctx, extension):
-    bot.unload_extension(f"Cogs.{extension}")
+    app.unload_extension(f"Cogs.{extension}")
     await ctx.send(f":white_check_mark: {extension}을(를) 언로드했습니다.")
 
 
-@bot.command(name="리로드")
+@app.command(name="리로드")
 @commands.has_permissions(administrator=True)
 async def reload_commands(ctx, extension=None):
     if extension is None:
         for filename in os.listdir("Cogs"):
             if filename.endswith(".py"):
-                bot.unload_extension(f"Cogs.{filename[:-3]}")
-                bot.load_extension(f"Cogs.{filename[:-3]}")
+                app.unload_extension(f"Cogs.{filename[:-3]}")
+                app.load_extension(f"Cogs.{filename[:-3]}")
                 await ctx.send(f":white_check_mark: {filename[:-3]}을(를) 다시 불러왔습니다!")
     else:
-        bot.unload_extension(f"Cogs.{extension}")
-        bot.load_extension(f"Cogs.{extension}")
+        app.unload_extension(f"Cogs.{extension}")
+        app.load_extension(f"Cogs.{extension}")
         await ctx.send(f":white_check_mark: {extension}을(를) 다시 불러왔습니다!")
 
 
-@bot.event
+@app.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.reply("권한이 없어요", mention_author=True)
@@ -88,5 +88,5 @@ async def on_command_error(ctx, error):
 
 
 if __name__ == "__main__":
-    bot.run(TOKEN)
+    app.run(TOKEN)
     db.close()

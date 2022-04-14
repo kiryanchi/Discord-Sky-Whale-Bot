@@ -76,7 +76,7 @@ class Music(commands.Cog):
                 if self.db.select_music_channel(ctx.guild.id):
                     self.db.delete_music_channel(ctx.guild.id)
                 self.db.insert_music_channel(ctx.guild.id, ctx.channel.id)
-                await Music._init_channel(ctx.channel)
+                await Music._init_channel(self.app, ctx.channel)
 
         embed = Embed.init()
         components = Components.init()[0]
@@ -90,12 +90,12 @@ class Music(commands.Cog):
         )
         await ctx.message.delete(delay=5)
 
-    @staticmethod
-    async def _init_channel(channel):
+    @classmethod
+    async def _init_channel(cls, app, channel):
         await channel.purge()
         playlist_msg = await channel.send(msg)
 
-        playlist = Playlist(channel=channel, playlist_msg=playlist_msg)
+        playlist = Playlist(app=app, channel=channel, playlist_msg=playlist_msg)
 
         await playlist_msg.edit(
             embed=Embed.playlist(playlist), components=Components.playlist()
