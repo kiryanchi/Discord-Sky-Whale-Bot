@@ -30,7 +30,7 @@ class Music(commands.Cog):
             _, channel_id = guild
 
             channel = self.app.get_channel(channel_id)
-            await Music._init_channel(channel)
+            await Music._init_channel(self.app, channel)
 
         print("Music bot init done")
 
