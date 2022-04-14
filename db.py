@@ -44,8 +44,8 @@ class DB:
         except sqlite3.OperationalError:
             self.make_db_file()
             self.select_all_music_channel()
-        else:
-            return self.cursor.fetchall()
+            return
+        return self.cursor.fetchall()
 
     def select_music_channel(self, guild_id):
         query_string = (
