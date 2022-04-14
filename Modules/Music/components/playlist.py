@@ -2,11 +2,12 @@ import discord
 
 
 class Playlist:
-    def __init__(self, channel, playlist_msg):
+    def __init__(self, app, channel, playlist_msg):
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
         }
+        self.app = app
         self.channel = channel
         self.playlist_msg = playlist_msg
         self.voice_channel = None
@@ -65,17 +66,17 @@ class Playlist:
         self.voice_client.stop()
         await self._play_song()
 
-    async def _play_song(self, app):
+    async def _play_song(self):
         song = self.get_next_song()
         self.playing = True
         self.voice_client.play(
             discord.PCMVolumeTransformer(
                 discord.FFmpegPCMAudio(song.mp3, **self.FFMPEG_OPTIONS)
             ),
-            after=lambda error: app.loop.create_task(self._check_queue(song)),
+            after=lambda error: self.app.loop.create_task(self._check_queue(song)),
         )
 
-    async def play(self, app, message, song):
+    async def play(self, message, song):
         self.add_next_song(song)
         # 음성 채널에 연결되어 있지 않다면, 음성 채널에 입장
         if self.voice_client is None:
