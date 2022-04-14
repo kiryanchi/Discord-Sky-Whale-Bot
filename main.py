@@ -29,8 +29,13 @@ async def on_ready():
     print("--------------------------")
     change_game.start()
 
-    channel = bot.get_channel(962232434613710878)
-    await Music._init_channel(channel)
+    guilds = db.select_all_music_channel()
+
+    for guild in guilds:
+        _, channel_id = guild
+
+        channel = bot.get_channel(channel_id)
+        await Music._init_channel(channel)
 
 
 @bot.event

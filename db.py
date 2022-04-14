@@ -12,7 +12,7 @@ class DB:
         self.con = sqlite3.connect("muple.db")
         self.cursor = self.con.cursor()
 
-    def save(self, query_string, param=None):
+    def update_query(self, query_string, param=None):
         if param:
             self.cursor.execute(query_string, param)
         else:
@@ -23,16 +23,24 @@ class DB:
         self.con.close()
         print("DB 성공적으로 해제 됨")
 
-    def insert_music_channel(self, guild_id, channel_id, playlist_id, button_id):
-        query_string = f"INSERT INTO music_channel VALUES ({guild_id}, {channel_id}, {playlist_id}, {button_id})"
-        self.save(query_string)
+    def insert_music_channel(self, guild_id, channel_id):
+        query_string = f"INSERT INTO music_channel VALUES ({guild_id}, {channel_id})"
+        self.update_query(query_string)
+
+    def select_all_music_channel(self):
+        query_string = "SELECT * FROM music_channel"
+        self.update_query(query_string)
+
+        return self.cursor.fetchall()
 
     def select_music_channel(self, guild_id):
-        query_string = "SELECT * FROM music_channel WHERE guild_id='%s'" % guild_id
-        self.cursor.execute(query_string)
+        query_string = (
+            "SELECT channel_id FROM music_channel WHERE guild_id='%s'" % guild_id
+        )
+        self.update_query(query_string)
 
         return self.cursor.fetchall()
 
     def delete_music_channel(self, guild_id):
         query_string = "DELETE FROM music_channel WHERE guild_id='%s'" % guild_id
-        self.save(query_string)
+        self.update_query(query_string)

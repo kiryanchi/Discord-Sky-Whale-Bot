@@ -7,6 +7,7 @@ from Modules.Music.utils.embeds import Embed
 from Modules.Music.utils.components import Components
 from Modules.Music.components.playlist import Playlist
 from Modules.Music.components.youtube import Youtube
+from db import DB
 
 
 class Music(commands.Cog):
@@ -14,6 +15,7 @@ class Music(commands.Cog):
         DiscordComponents(app)
         super().__init__()
         self.app = app
+        self.db = DB()
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -37,6 +39,9 @@ class Music(commands.Cog):
     async def init(self, ctx):
         async def callback(interaction):
             if interaction.user == ctx.author:
+                if self.db.select_music_channel(ctx.guild.id):
+                    self.db.delete_music_channel(ctx.guild.id)
+                self.db.insert_music_channel(ctx.guild.id, ctx.channel.id)
                 await Music._init_channel(ctx.channel)
 
         embed = Embed.init()
@@ -53,6 +58,7 @@ class Music(commands.Cog):
 
     @staticmethod
     async def _init_channel(channel):
+        await channel.purge()
         await channel.send("하늘고래가 이곳을 향유하기 시작했어요.")
         await asyncio.sleep(2)
         await channel.purge()
