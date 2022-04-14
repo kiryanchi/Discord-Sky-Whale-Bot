@@ -1,4 +1,8 @@
 import sqlite3
+import os
+
+
+DB_FILE = "sky_whale_bot.db"
 
 
 class DB:
@@ -9,8 +13,14 @@ class DB:
         return cls._instance
 
     def __init__(self):
-        self.con = sqlite3.connect("sky_whale_bot.db")
+        if os.path.isfile(DB_FILE):
+            self.make_db_file()
+        self.con = sqlite3.connect(DB_FILE)
         self.cursor = self.con.cursor()
+
+    def make_db_file(self):
+        query_string = "CREATE TABLE music_channel(guild_id int, channel_id int)"
+        self.update_query(query_string)
 
     def update_query(self, query_string, param=None):
         if param:
@@ -28,10 +38,14 @@ class DB:
         self.update_query(query_string)
 
     def select_all_music_channel(self):
-        query_string = "SELECT * FROM music_channel"
-        self.update_query(query_string)
-
-        return self.cursor.fetchall()
+        try:
+            query_string = "SELECT * FROM music_channel"
+            self.update_query(query_string)
+        except sqlite3.OperationalError:
+            self.make_db_file()
+            self.select_all_music_channel()
+        else:
+            return self.cursor.fetchall()
 
     def select_music_channel(self, guild_id):
         query_string = (
