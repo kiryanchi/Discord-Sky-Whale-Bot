@@ -7,7 +7,12 @@ from Modules.Music.utils.embeds import Embed
 from Modules.Music.utils.components import Components
 from Modules.Music.components.playlist import Playlist
 from Modules.Music.components.youtube import Youtube
+from Modules.Music.components.queue import Queue
+from Modules.Music.components.song import Song
 from db import DB
+
+
+q = Queue()
 
 
 class Music(commands.Cog):
@@ -22,17 +27,31 @@ class Music(commands.Cog):
         if message.author == self.app.user:
             return
 
-        if message.author.voice is None:
-            await message.channel.send("음성 채널에 들어가서 사용해주세요", delete_after=3)
-            await asyncio.sleep(3)
-            return await message.delete()
+        if message.channel.id == q[message.guild.id].get_channel_id():
+            if message.content == ".초기화":
+                await self.app.process_commands(message)
+                return
 
-        info = await self.app.loop.run_in_executor(
-            None, lambda: Youtube.search(message.content)
-        )
-        song = await Youtube.select(self.app, message, info)
+            if message.content.startswith("."):
+                pass
 
-        print(song)
+            if message.author.voice is None:
+                await message.channel.send("음성 채널에 들어가서 사용해주세요", delete_after=3)
+                await asyncio.sleep(3)
+                return await message.delete()
+
+            if "youtube.com" in message.content:
+                # Yotube play
+                await message.channel.send("Youtube Search", delete_after=3)
+
+            else:
+                info = await self.app.loop.run_in_executor(
+                    None, lambda: Youtube.search(message.content)
+                )
+                song = await Youtube.select(self.app, message, info)
+                song = Song(song)
+
+                print(song)
 
     @commands.command("초기화")
     @commands.has_permissions(administrator=True)
@@ -66,11 +85,12 @@ class Music(commands.Cog):
         song = "> " + "{0:\u2000>30}".format("하늘고래")
         queue = "> " + "{0:\u2000>30}".format("sky whale")
 
-        playlist = await channel.send(
+        playlist_msg = await channel.send(
             embed=Embed.playlist(song, queue), components=Components.playlist()
         )
 
-        playlist = Playlist(playlist)
+        playlist = Playlist(channel=channel, playlist_msg=playlist_msg, vc=None)
+        q[channel.guild.id] = playlist
 
 
 def setup(app):

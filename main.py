@@ -4,12 +4,14 @@ from discord.ext import commands, tasks
 from itertools import cycle
 import os
 
+from Modules.Music.components.queue import Queue
 from Cogs.Music import Music
 
 TOKEN = open("token", "r").readline()
 GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
 
 db = DB()
+q = Queue()
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=".", intents=intents)
 
@@ -37,11 +39,18 @@ async def on_ready():
         channel = bot.get_channel(channel_id)
         await Music._init_channel(channel)
 
+    print("Music bot init done")
+
 
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
+
+    # 음악 채널에 명령어를 사용하면 종료
+    if message.channel.id == q[message.guild.id].get_channel_id():
+        if message.content.startswith("."):
+            return
 
     if message.content.startswith("."):
         await bot.process_commands(message)

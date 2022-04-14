@@ -1,6 +1,6 @@
 class Song:
-    def __init__(self, info, guild):
-        self.title = info["title"]
-        self.duration = info["duration"]
-        self.thumbnail = info["thumbnails"][0]["url"]
-        self.link = info["link"]
+    def __init__(self, song):
+        self.title = song["title"]
+        self.duration = song["duration"]
+        self.thumbnail = song["thumbnails"][0]["url"]
+        self.link = song["link"]
