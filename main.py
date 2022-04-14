@@ -5,7 +5,6 @@ from itertools import cycle
 import os
 
 from Modules.Music.components.queue import Queue
-from Cogs.Music import Music
 
 TOKEN = open("token", "r").readline()
 GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])

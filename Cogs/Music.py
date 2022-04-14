@@ -11,7 +11,7 @@ from Modules.Music.components.song import Song
 from db import DB
 
 
-q = Queue()
+playlist_queue = Queue()
 msg = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [35m향유[0m하기 시작했어요\n```"
 
 
@@ -40,8 +40,8 @@ class Music(commands.Cog):
             return
 
         if (
-            q[message.guild.id]
-            and message.channel.id == q[message.guild.id].get_channel_id()
+            playlist_queue[message.guild.id]
+            and message.channel.id == playlist_queue[message.guild.id].get_channel_id()
         ):
             if message.content == ".초기화":
                 await self.app.process_commands(message)
@@ -58,11 +58,15 @@ class Music(commands.Cog):
             if "youtube.com" in message.content:
                 # Yotube play
                 await message.channel.send("youtube 주소 검색 기능은 구현중입니다..", delete_after=3)
+                return
 
-            else:
-                song = await Youtube.search_and_select(self.app, message)
+            if (info := await Youtube.search_and_select(self.app, message)) is None:
+                return
 
-                print(song)
+            song = Song(info)
+
+            playlist: Playlist = playlist_queue[message.guild.id]
+            await playlist.play(message, song)
 
     @commands.command("초기화")
     @commands.has_permissions(administrator=True)
@@ -90,7 +94,6 @@ class Music(commands.Cog):
     async def _init_channel(channel):
         await channel.purge()
         playlist_msg = await channel.send(msg)
-        await asyncio.sleep(2)
 
         playlist = Playlist(channel=channel, playlist_msg=playlist_msg)
 
@@ -98,7 +101,7 @@ class Music(commands.Cog):
             embed=Embed.playlist(playlist), components=Components.playlist()
         )
 
-        q[channel.guild.id] = playlist
+        playlist_queue[channel.guild.id] = playlist
 
 
 def setup(app):

@@ -5,7 +5,6 @@ from youtubesearchpython import VideosSearch
 from discord_components import Button, ButtonStyle
 
 from Modules.Music.utils.embeds import Embed
-from Modules.Music.components.song import Song
 
 
 class Youtube:
@@ -13,31 +12,28 @@ class Youtube:
     YDL_OPTS = {"format": "bestaudio", "quiet": False}
 
     @classmethod
-    async def search_and_select(cls, app, message: discord.Message):
+    def extract_info(cls, song):
+        with youtube_dl.YoutubeDL(cls.YDL_OPTS) as ydl:
+            info = ydl.extract_info(song.link, download=False)
+            mp3 = info["formats"][0]["url"]
+
+        return mp3
+
+    @classmethod
+    async def search_and_select(cls, app, message):
         info: dict = await app.loop.run_in_executor(
             None, lambda: cls.search(cls, message.content)
         )
-        song = await cls.select(cls, app, message, info)
+        info = await cls.select(cls, app, message, info)
 
-        if song is not None:
-            song = Song(song)
+        return info
 
-        return song
-
-    def search(self, content: str):
+    def search(self, content):
         info = VideosSearch(content, limit=self.NUM_OF_SEARCH)
 
         return info.result()["result"]
 
-    @classmethod
-    def extract_info(cls, song: Song):
-        with youtube_dl.YoutubeDL(cls.YDL_OPTS) as ydl:
-            info = ydl.extract_info(song.link, download=False)
-            url = info["formats"][0]["url"]
-
-        return url
-
-    async def select(self, app, message: discord.Message, info: dict):
+    async def select(self, app, message, info):
         def check(interaction):
             return (
                 message.author == interaction.user
