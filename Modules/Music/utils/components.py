@@ -31,7 +31,7 @@ class Components:
                 playlist.help()
                 return
             elif custom_id == "skip":
-                playlist.skip()
+                await playlist.skip()
             elif custom_id == "prev_page":
                 await playlist.prev_page()
             elif custom_id == "next_page":
