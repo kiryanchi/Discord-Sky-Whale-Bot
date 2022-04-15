@@ -48,6 +48,12 @@ class Playlist:
     async def help(self):
         pass
 
+    async def skip(self):
+        if self.voice_client is None:
+            return
+        if self.playing:
+            await self._check_queue()
+
     async def prev_page(self):
         if self.current_page > 0:
             self.current_page -= 1
@@ -67,6 +73,9 @@ class Playlist:
         if self.current_page != self.max_page:
             self.current_page = self.max_page
             await self.update_playlist()
+
+    async def youtube(self):
+        pass
 
     def get_channel_id(self):
         return self.channel.id

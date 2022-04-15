@@ -30,6 +30,8 @@ class Components:
             elif custom_id == "help":
                 playlist.help()
                 return
+            elif custom_id == "skip":
+                playlist.skip()
             elif custom_id == "prev_page":
                 await playlist.prev_page()
             elif custom_id == "next_page":
@@ -38,6 +40,8 @@ class Components:
                 await playlist.first_page()
             elif custom_id == "last_page":
                 await playlist.last_page()
+            elif custom_id == "Youtube":
+                await playlist.youtube()
 
             await interaction.send(
                 interaction.custom_id, delete_after=1, ephemeral=False
@@ -55,6 +59,10 @@ class Components:
                 ),
                 app.components_manager.add_callback(
                     Button(style=ButtonStyle.blue, label="↻", custom_id="shuffle"),
+                    callback,
+                ),
+                app.components_manager.add_callback(
+                    Button(style=ButtonStyle.blue, label="skip", custom_id="skip"),
                     callback,
                 ),
                 app.components_manager.add_callback(
@@ -77,6 +85,12 @@ class Components:
                 ),
                 app.components_manager.add_callback(
                     Button(style=ButtonStyle.grey, label=">>", custom_id="last_page"),
+                    callback,
+                ),
+                app.components_manager.add_callback(
+                    Button(
+                        style=ButtonStyle.grey, label="Youtube", custom_id="Youtube"
+                    ),
                     callback,
                 ),
             ],
