@@ -64,10 +64,10 @@ class Youtube:
             res = await app.wait_for("button_click", check=check, timeout=15)
             select = res.component.label
             if select == "Cancel":
-                raise TimeoutError
+                raise asyncio.exceptions.TimeoutError
             else:
                 select = int(select)
-        except TimeoutError:
+        except asyncio.exceptions.TimeoutError:
             await msg.delete()
             await message.channel.send("노래 선택이 취소되었습니다.", delete_after=5)
             await asyncio.sleep(5)

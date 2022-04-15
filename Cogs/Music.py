@@ -12,7 +12,7 @@ from db import DB
 
 
 playlist_queue = Queue()
-msg = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [35m향유[0m하기 시작했어요\n```"
+msg = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [1;35m향유[0m하기 시작했어요\n```"
 
 
 class Music(commands.Cog):

@@ -58,7 +58,7 @@ class Playlist:
         self.voice_client = None
         self.playing = False
 
-    async def _check_queue(self, song):
+    async def _check_queue(self):
         if len(self.get_next_songs()) == 0:
             await self.leave()
             return
@@ -68,12 +68,14 @@ class Playlist:
     async def _play_song(self):
         song = self.get_next_song()
         self.playing = True
-        self.voice_client.play(
-            discord.PCMVolumeTransformer(
-                discord.FFmpegPCMAudio(song.mp3, **self.FFMPEG_OPTIONS)
-            ),
-            after=lambda error: self.app.loop.create_task(self._check_queue(song)),
-        )
+        # self.voice_client.play(
+        #    discord.PCMVolumeTransformer(
+        #        discord.FFmpegPCMAudio(song.mp3, **self.FFMPEG_OPTIONS)
+        #    ),
+        #    after=lambda error: self.app.loop.create_task(self._check_queue(song)),
+        # )
+        await asyncio.sleep(20)
+        await self._check_queue()
 
     async def play(self, message, song):
         # 노래를 추가한다
