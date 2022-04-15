@@ -103,7 +103,7 @@ class Playlist:
                 discord.PCMVolumeTransformer(
                     discord.FFmpegPCMAudio(song.mp3, **self.FFMPEG_OPTIONS)
                 ),
-                after=lambda error: self.app.loop.create_task(self._check_queue(song)),
+                after=lambda error: self.app.loop.create_task(self._check_queue()),
             )
         except discord.opus.OpusNotLoaded:
             await asyncio.sleep(20)
