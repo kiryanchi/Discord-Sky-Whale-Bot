@@ -96,10 +96,7 @@ class Music(commands.Cog):
         playlist_msg = await channel.send(msg)
 
         playlist = Playlist(app=app, channel=channel, playlist_msg=playlist_msg)
-
-        await playlist_msg.edit(
-            embed=Embed.playlist(playlist), components=Components.playlist()
-        )
+        await playlist.update_playlist_message()
 
         playlist_queue[channel.guild.id] = playlist
 

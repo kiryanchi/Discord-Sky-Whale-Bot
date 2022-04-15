@@ -17,29 +17,16 @@ class Embed:
         return embed
 
     @classmethod
-    def playlist(cls, playlist):
+    def playlist(cls, current_song, next_songs):
         # TODO: 아직 미완성
 
         embed = (
             discord.Embed(title="\u2000" * 5 + "Sky Whale", color=cls.COLOR)
-            .set_thumbnail(url=cls.URL)
+            .set_image(url=cls.URL)
+            .add_field(name=cls.CURRENT_SONG_NAME, value=current_song, inline=False)
+            .add_field(name=cls.NEXT_SONGS_NAME, value=next_songs, inline=False)
             .set_footer(text="노래를 검색해서 추가하세요.")
         )
-
-        # 현재 재생중 갱신
-        if not (song := playlist.get_current_song()):
-            embed.add_field(
-                name=cls.CURRENT_SONG_NAME, value="하늘 고래가 쉬고있어요", inline=False
-            )
-        else:
-            embed.add_field(name=cls.CURRENT_SONG_NAME, value=f"{song.title}")
-
-        # 대기중인 노래 갱신
-        if not (next_songs := playlist.get_next_songs()):
-            embed.add_field(name=cls.NEXT_SONGS_NAME, value="다음 곡이 없어요")
-        else:
-            next_songs = "\n".join(next_songs)
-            embed.add_field(name=cls.NEXT_SONGS_NAME, value=f"{next_songs}")
 
         return embed
 
