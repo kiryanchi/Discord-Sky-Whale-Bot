@@ -28,36 +28,42 @@ class Playlist:
         self.max_page = 0
 
     def pause(self):
+        if self.voice_client is None:
+            return
         if not self.voice_client.is_paused():
             self.voice_client.pause()
 
     def resume(self):
+        if self.voice_client is None:
+            return
         if self.voice_client.is_paused():
             self.voice_client.resume()
 
-    def shuffle(self):
+    async def shuffle(self):
+        if len(self.get_next_songs()) == 0:
+            return
         random.shuffle(self.queue["next_songs"])
         await self.update_playlist()
 
-    def help(self):
+    async def help(self):
         pass
 
-    def prev_page(self):
+    async def prev_page(self):
         if self.current_page > 0:
             self.current_page -= 1
             await self.update_playlist()
 
-    def next_page(self):
+    async def next_page(self):
         if self.current_page < self.max_page:
             self.current_page += 1
             await self.update_playlist()
 
-    def first_page(self):
+    async def first_page(self):
         if self.current_page != 0:
             self.current_page = 0
             await self.update_playlist()
 
-    def last_page(self):
+    async def last_page(self):
         if self.current_page != self.max_page:
             self.current_page = self.max_page
             await self.update_playlist()
@@ -116,7 +122,7 @@ class Playlist:
             tmp = Embed.wrap(song_list[i])
             text += f"> {SPACE}[{self.current_page * 10 + i + 1}] {tmp}\n"
         text += f"> {SPACE}{SPACE}{SPACE}{SPACE}\n"
-        text += f"> {SPACE} 현재 페이지 {self.current_page + 1} / {self.max_page}"
+        text += f"> {SPACE} 현재 페이지 {self.current_page + 1} / {self.max_page + 1}"
         return text
 
     def add_next_song(self, song):

@@ -15,7 +15,10 @@ class Components:
     @classmethod
     def playlist(cls, app):
         async def callback(interaction):
-            playlist = playlist_queue[f"{interaction.guild.id}"]
+            print(f"{interaction.guild.id}")
+            print(playlist_queue.queue)
+            playlist = playlist_queue[interaction.guild.id]
+            print(playlist)
             custom_id = interaction.custom_id
 
             if custom_id == "pause":
@@ -23,21 +26,21 @@ class Components:
             elif custom_id == "resume":
                 playlist.resume()
             elif custom_id == "shuffle":
-                playlist.shuffle()
+                await playlist.shuffle()
             elif custom_id == "help":
                 playlist.help()
                 return
             elif custom_id == "prev_page":
-                playlist.prev_page()
+                await playlist.prev_page()
             elif custom_id == "next_page":
-                playlist.next_page()
+                await playlist.next_page()
             elif custom_id == "first_page":
-                playlist.first_page()
+                await playlist.first_page()
             elif custom_id == "last_page":
-                playlist.last_page()
+                await playlist.last_page()
 
             await interaction.send(
-                interaction.custom_id, delete_after=5, ephemeral=False
+                interaction.custom_id, delete_after=1, ephemeral=False
             )
 
         components = [
