@@ -1,4 +1,5 @@
 import discord
+import re
 
 
 class Embed:
@@ -44,3 +45,24 @@ class Embed:
             )
 
         return embed
+
+    @staticmethod
+    def wrap(text):
+        def is_korean(char):
+            hangul = re.compile("[^ㄱ-ㅣ가-힣]+")
+            result = hangul.sub("", char)
+            return result != ""
+
+        word_cnt = 0
+        result_text = ""
+        for char in text:
+            if word_cnt > 42:
+                result_text += "..."
+                break
+
+            if is_korean(char):
+                word_cnt += 2
+            else:
+                word_cnt += 1
+            result_text += char
+        return result_text

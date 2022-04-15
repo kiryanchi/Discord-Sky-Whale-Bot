@@ -1,8 +1,11 @@
 import discord
 import asyncio
+import random
 
 from Modules.Music.utils.components import Components
 from Modules.Music.utils.embeds import Embed
+
+SPACE = "\u17B5"
 
 
 class Playlist:
@@ -21,6 +24,43 @@ class Playlist:
             "next_songs": [],
         }
         self.playing = False
+        self.current_page = 0
+        self.max_page = 0
+
+    def pause(self):
+        if not self.voice_client.is_paused():
+            self.voice_client.pause()
+
+    def resume(self):
+        if self.voice_client.is_paused():
+            self.voice_client.resume()
+
+    def shuffle(self):
+        random.shuffle(self.queue["next_songs"])
+        await self.update_playlist()
+
+    def help(self):
+        pass
+
+    def prev_page(self):
+        if self.current_page > 0:
+            self.current_page -= 1
+            await self.update_playlist()
+
+    def next_page(self):
+        if self.current_page < self.max_page:
+            self.current_page += 1
+            await self.update_playlist()
+
+    def first_page(self):
+        if self.current_page != 0:
+            self.current_page = 0
+            await self.update_playlist()
+
+    def last_page(self):
+        if self.current_page != self.max_page:
+            self.current_page = self.max_page
+            await self.update_playlist()
 
     def get_channel_id(self):
         return self.channel.id
@@ -37,28 +77,46 @@ class Playlist:
     def get_next_song(self):
         return self.queue["next_songs"].pop(0)
 
-    async def update_playlist_message(self):
+    async def update_playlist(self):
+        self.max_page = len(self.get_next_songs()) // 10
+        if self.current_page > self.max_page:
+            self.current_page = self.max_page
+        await self._update_playlist_message()
+
+    async def _update_playlist_message(self):
         current_song_message = self._make_current_song_embed_message()
         next_songs_message = self._make_next_songs_embed_message()
         await self.playlist_msg.edit(
             embed=Embed.playlist(current_song_message, next_songs_message),
-            components=Components.playlist(),
+            components=Components.playlist(self.app),
         )
 
     def _make_current_song_embed_message(self):
         if (song := self.get_current_song()) is None:
-            return "비어 있어요"
+            return "재생중인 노래가 없습니다."
         return song.title
 
     def _make_next_songs_embed_message(self):
-        next_songs = self.get_next_songs()
-        if len(next_songs) == 0:
-            return "비어 있ㄴ요"
+        next_song_list = self.get_next_songs()
+        song_list = []
+        try:
+            for i in range(10 * self.current_page, 10 * (self.current_page + 1)):
+                song_list.append(next_song_list[i].title)
+        except IndexError:
+            # 노래가 10개 이하라면 IndexError 발생
+            pass
+        append_song_list = []
+        # 예약된 곡이 10곡 이하라면 남은 공간에 재생목록이 비어있다고 표시
+        if len(song_list) < 10:
+            append_song_list = ["예약된 노래가 없습니다." for i in range(10 - len(song_list))]
 
+        song_list = [*song_list, *append_song_list]
         text = ""
-        for idx in range(len(next_songs)):
-            text += f"[{idx + 1}] {next_songs[idx].title}\n"
-
+        for i in range(len(song_list)):
+            tmp = Embed.wrap(song_list[i])
+            text += f"> {SPACE}[{self.current_page * 10 + i + 1}] {tmp}\n"
+        text += f"> {SPACE}{SPACE}{SPACE}{SPACE}\n"
+        text += f"> {SPACE} 현재 페이지 {self.current_page + 1} / {self.max_page}"
         return text
 
     def add_next_song(self, song):
@@ -88,7 +146,7 @@ class Playlist:
     async def _check_queue(self):
         if not self.get_next_songs():
             await self.leave()
-            await self.update_playlist_message()
+            await self.update_playlist()
             return
         self.voice_client.stop()
         await self._play_song()
@@ -97,7 +155,7 @@ class Playlist:
         song = self.get_next_song()
         self.set_current_song(song)
         self.playing = True
-        await self.update_playlist_message()
+        await self.update_playlist()
         try:
             self.voice_client.play(
                 discord.PCMVolumeTransformer(
@@ -131,7 +189,7 @@ class Playlist:
 
         # 노래를 재생 중이라면,
         else:
-            await self.update_playlist_message()
+            await self.update_playlist()
             if not self.is_same_voice_channel(message.author.voice.channel):
                 await message.channel.send(
                     "노래를 추가했어요! 하지만 채널이 다르신 것 같아요.. 노래를 듣고싶으면 제 음성 채널에 들어와주세요!",

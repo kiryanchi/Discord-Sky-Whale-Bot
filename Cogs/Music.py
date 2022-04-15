@@ -96,7 +96,7 @@ class Music(commands.Cog):
         playlist_msg = await channel.send(msg)
 
         playlist = Playlist(app=app, channel=channel, playlist_msg=playlist_msg)
-        await playlist.update_playlist_message()
+        await playlist.update_playlist()
 
         playlist_queue[channel.guild.id] = playlist
 
