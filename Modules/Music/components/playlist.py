@@ -37,29 +37,28 @@ class Playlist:
     def add_next_song(self, song):
         self.queue["next_songs"].append(song)
 
-    def is_same_voice_channel(self, channel):
-        return self.voice_channel == channel
+    def is_same_voice_channel(self, voice_channel):
+        return self.voice_channel == voice_channel
 
     def reset_voice_status(self):
         self.voice_channel = None
         self.voice_client = None
+        self.playing = False
 
-    async def join(self, channel):
-        self.voice_channel = channel
+    async def join(self, voice_channel):
+        self.voice_channel = voice_channel
         self.voice_client = await self.voice_channel.connect()
 
-    async def move(self, channel):
-        self.voice_channel = channel
+    async def move(self, voice_channel):
+        self.voice_channel = voice_channel
         await self.voice_client.move_to(self.voice_channel)
 
     async def leave(self):
         await self.voice_client.disconnect()
-        self.voice_channel = None
-        self.voice_client = None
-        self.playing = False
+        self.reset_voice_status()
 
     async def _check_queue(self):
-        if len(self.get_next_songs()) == 0:
+        if not self.get_next_songs():
             await self.leave()
             return
         self.voice_client.stop()
