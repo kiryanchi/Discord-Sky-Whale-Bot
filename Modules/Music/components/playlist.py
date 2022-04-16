@@ -52,6 +52,7 @@ class Playlist:
         if self.voice_client is None:
             return
         if self.playing:
+            self.voice_client.stop()
             await self._check_queue()
 
     async def prev_page(self):

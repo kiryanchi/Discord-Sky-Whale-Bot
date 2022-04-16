@@ -67,7 +67,7 @@ class Youtube:
                 raise asyncio.exceptions.TimeoutError
             else:
                 select = int(select)
-        except asyncio.exceptions.TimeoutError:
+        except asyncio.exceptions.TimeoutError or IndexError:
             await msg.delete()
             await message.channel.send("노래 선택이 취소되었습니다.", delete_after=5)
             await asyncio.sleep(5)
