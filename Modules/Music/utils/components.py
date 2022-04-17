@@ -31,7 +31,10 @@ class Components:
                 playlist.help()
                 return
             elif custom_id == "skip":
-                await playlist.skip()
+                await interaction.send(
+                    "skip 은 구현중입니다...", delete_after=2, ephemeral=False
+                )
+                return
             elif custom_id == "prev_page":
                 await playlist.prev_page()
             elif custom_id == "next_page":
