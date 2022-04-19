@@ -19,6 +19,8 @@ class Whale(ComponentsBot):
         super().__init__(command_prefix=command_prefix, intents=intents)
         self.music_channel_list = []
 
+        self.remove_command("help")
+
         for filename in os.listdir("Cogs"):
             if filename.endswith(".py"):
                 print(f"[INFO] 명령어 [{filename[:-3]:^15s}] 로드 완료")  # Log
