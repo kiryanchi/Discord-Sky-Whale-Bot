@@ -80,7 +80,7 @@ class Playlist:
             self.current_page = self.max_page
             await self.update_playlist()
 
-    async def youtube(self):
+    def youtube(self):
         if song := self.get_current_song():
             return song.link
 
