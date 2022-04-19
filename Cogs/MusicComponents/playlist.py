@@ -9,12 +9,13 @@ SPACE = "\u17B5"
 
 
 class Playlist:
-    def __init__(self, text_channel):
+    def __init__(self, bot, text_channel):
         self.YDL_OPTS = {"format": "bestaudio", "quiet": False}
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
         }
+        self.bot = bot
         self.text_channel = text_channel
         self.playlist_msg = None
         self.voice_channel = None
@@ -182,7 +183,7 @@ class Playlist:
                 discord.PCMVolumeTransformer(
                     discord.FFmpegPCMAudio(mp3, **self.FFMPEG_OPTIONS)
                 ),
-                after=lambda error: self._check_queue(),
+                after=lambda error: self.bot.loop.create_task(self._check_queue()),
             )
         except discord.opus.OpusNotLoaded:
             print(

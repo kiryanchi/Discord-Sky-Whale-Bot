@@ -129,7 +129,7 @@ class Music(commands.Cog):
                 await playlist.youtube()
 
         await channel.purge()
-        playlist = Playlist(text_channel=channel)
+        playlist = Playlist(bot=self.bot, text_channel=channel)
 
         embed, components_list = self.playlist_embed.playlist(playlist)
         components = [
