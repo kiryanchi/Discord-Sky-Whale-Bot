@@ -93,8 +93,9 @@ class PlaylistEmbed:
             [
                 Button(style=ButtonStyle.red, label="||", custom_id="pause"),
                 Button(style=ButtonStyle.green, label="▶", custom_id="resume"),
-                Button(style=ButtonStyle.blue, label="↻", custom_id="shuffle"),
                 Button(style=ButtonStyle.blue, label="skip", custom_id="skip"),
+                Button(style=ButtonStyle.grey, label="↻", custom_id="shuffle"),
+                Button(style=ButtonStyle.grey, label="?", custom_id="help"),
             ],
             [
                 Button(style=ButtonStyle.grey, label="<", custom_id="prev_page"),
