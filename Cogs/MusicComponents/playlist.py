@@ -182,7 +182,7 @@ class Playlist:
                 discord.PCMVolumeTransformer(
                     discord.FFmpegPCMAudio(mp3, **self.FFMPEG_OPTIONS)
                 ),
-                after=lambda error: self.app.loop.create_task(self._check_queue()),
+                after=lambda error: self._check_queue(),
             )
         except discord.opus.OpusNotLoaded:
             print(
