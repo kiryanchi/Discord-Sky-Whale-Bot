@@ -29,12 +29,9 @@ class Music(commands.Cog):
         servers = db.select_all_music_channel()
         if servers:
             for guild_id, channel_id in servers:
-                guild = self.bot.get_guild(guild_id)
                 channel = self.bot.get_channel(channel_id)
                 await self.__handle_init_channel(channel)
-                print(
-                    f"[INFO] [{guild.name:^10s}] 길드 [{channel.name:^10s}] 채널 음악 봇 초기화 완료"
-                )  # Log
+            print("[INFO] 음악 봇 초기화 전체 완료")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -66,19 +63,6 @@ class Music(commands.Cog):
         song = Song(info)
 
         playlist = self.guilds_playlist[message.guild.id]
-        await playlist.play(message, song)
-
-    @classmethod
-    async def search(cls, message):
-        if "youtube.com" in message.content:
-            await message.channel.send("youtube 주소 검색 기능은 구현중이니다...", delete_after=3)
-            return
-
-        if (info := await cls.youtube.search_and_select(message)) is None:
-            return
-
-        song = Song(info)
-        playlist = cls.guilds_playlist[message.guild.id]
         await playlist.play(message, song)
 
     @commands.command("초기화")
@@ -161,6 +145,9 @@ class Music(commands.Cog):
 
         self.guilds_playlist[channel.guild.id] = playlist
         self.bot.add_music_channel(channel.id)
+        print(
+            f"[INFO] [{channel.guild.name:^10s}] 길드 [{channel.name:^10s}] 채널 음악 봇 초기화 완료"
+        )  # Log
 
 
 def setup(bot):
