@@ -180,6 +180,9 @@ class Playlist:
             mp3 = info["formats"][0]["url"]
 
         try:
+            print(
+                f"[INFO] [{self.text_channel.guild.name:^15s}] 길드에서 [{self.text_channel.name:^15s}] 채널에서 [{song.title}] 재생함 "
+            )  # Log
             self.voice_client.play(
                 discord.PCMVolumeTransformer(
                     discord.FFmpegPCMAudio(mp3, **self.FFMPEG_OPTIONS)
@@ -188,7 +191,7 @@ class Playlist:
             )
         except discord.opus.OpusNotLoaded:
             print(
-                f"[{self.text_channel.guild.name:^15s}] 길드에서 [{self.text_channel.name:^15s}] 채널에서 [{song.title}] 재생 실패함 "
+                f"[WARNING] [{self.text_channel.guild.name:^15s}] 길드에서 [{self.text_channel.name:^15s}] 채널에서 [{song.title}] 재생 실패함 "
             )  # Log
             await asyncio.sleep(20)
             await self._check_queue()
