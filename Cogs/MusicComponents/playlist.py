@@ -10,7 +10,7 @@ SPACE = "\u17B5"
 
 class Playlist:
     def __init__(self, bot, text_channel):
-        self.YDL_OPTS = {"format": "bestaudio", "quiet": False}
+        self.YDL_OPTS = {"format": "bestaudio", "quiet": True}
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
