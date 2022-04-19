@@ -126,6 +126,11 @@ class Music(commands.Cog):
                 return
             elif custom_id == "skip":
                 await playlist.skip()
+                await interaction.send(
+                    f"{interaction.author.name} 님이 노래를 스킵했습니다.",
+                    delete_after=3,
+                    ephemeral=False,
+                )
                 return
             elif custom_id == "prev_page":
                 await playlist.prev_page()
