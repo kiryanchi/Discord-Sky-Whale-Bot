@@ -13,7 +13,11 @@ INIT_MSG = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [1;35m향
 db = DB()
 
 
-class Music(commands.Cog):
+class Music(commands.Cog, name="음악"):
+    """
+    하늘 고래의 음악 명령어 카테고리입니다.
+    """
+
     guilds_playlist = {}
     youtube = None
 
@@ -65,7 +69,7 @@ class Music(commands.Cog):
         playlist = self.guilds_playlist[message.guild.id]
         await playlist.play(message, song)
 
-    @commands.command("초기화")
+    @commands.command(name="초기화", help="이 채널을 음악 채널로 설정합니다.", usage=".초기화")
     @commands.has_permissions(administrator=True)
     async def init(self, ctx) -> None:
         async def callback(interaction):

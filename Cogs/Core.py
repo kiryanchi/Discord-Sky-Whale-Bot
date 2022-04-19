@@ -1,22 +1,25 @@
 import discord
-import re
 from discord.ext import commands
 
 SPACE = "\u17B5"
 
 
-class Core(commands.Cog):
+class Core(commands.Cog, name="기본"):
+    """
+    하늘 고래의 기본 명령어 카테고리입니다.
+    """
+
     def __init__(self, bot) -> None:
         super().__init__()
         self.bot = bot
 
-    @commands.command(name="도움", help="도움말을 보여줍니다")
+    @commands.command(name="도움", help="도움말을 보여줍니다", usage=".도움")
     async def help(self, ctx, func=None):
+        cog_list = ["기본", "음악"]
         if func is None:
             embed = discord.Embed(
                 title="하늘 고래 도우미", description="명령어 앞에 `.` 를 꼭 붙여주세요."
             )
-            cog_list = ["Core", "Music"]
 
             for cog in cog_list:
                 cog_data = self.bot.get_cog(cog)
@@ -26,7 +29,7 @@ class Core(commands.Cog):
                     value=" ".join([command.name for command in command_list]),
                     inline=True,
                 )
-            embed.set_footer(text="명령어를 자세히 보려면 `.도움 (명령어)` 를 입력해주세요. ex) .도움 초기화")
+            embed.set_footer(text="명령어를 자세히 보려면 .도움 명령어 를 입력해주세요. ex) .도움 초기화")
             await ctx.send(embed=embed)
         else:
             command_notfound = True
@@ -37,15 +40,29 @@ class Core(commands.Cog):
                 else:
                     for title in cog.get_commands():
                         if title.name == func:
-                            cmd = self.app.get_command(title.name)
+                            cmd = self.bot.get_command(title.name)
                             embed = discord.Embed(
-                                title=f"명령어 : {cmd}", description=cmd.help
+                                title=f"명령어 : {cmd.name}", description=cmd.help
                             ).add_field(name="사용법", value=cmd.usage)
                             await ctx.send(embed=embed)
                             command_notfound = False
                             break
                         else:
                             command_notfound = True
+            if command_notfound:
+                if func in cog_list:
+                    cog_data = self.bot.get_cog(func)
+                    command_list = cog_data.get_commands()
+                    embed = discord.Embed(
+                        title=f"카테고리: {cog_data.qualified_name}",
+                        description=cog_data.description,
+                    ).add_field(
+                        name="명령어들",
+                        value=", ".join([command.name for command in command_list]),
+                    )
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send("그런 이름의 명렁어나 카테고리는 없습니다.")
 
 
 def setup(bot):
