@@ -92,8 +92,8 @@ class PlaylistEmbed:
         components = [
             [
                 Button(style=ButtonStyle.red, label="||", custom_id="pause"),
-                Button(style=ButtonStyle.green, label="?", custom_id="resume"),
-                Button(style=ButtonStyle.blue, label="?", custom_id="shuffle"),
+                Button(style=ButtonStyle.green, label="▶", custom_id="resume"),
+                Button(style=ButtonStyle.blue, label="↻", custom_id="shuffle"),
                 Button(style=ButtonStyle.blue, label="skip", custom_id="skip"),
             ],
             [
