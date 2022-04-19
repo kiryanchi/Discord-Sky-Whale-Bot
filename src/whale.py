@@ -5,17 +5,30 @@ from discord_components import ComponentsBot
 from itertools import cycle
 
 from src.db import DB
+from Cogs.Music import Music
 
 GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
+COMMAND_PREFIX = "."
+
+
+db = DB()
 
 
 class Whale(ComponentsBot):
     def __init__(self, command_prefix: str, intents: discord.Intents, env: str):
         super().__init__(command_prefix=command_prefix, intents=intents)
-        self.db: DB = DB()
+        self.music_channel_list = []
+
+        for filename in os.listdir("Cogs"):
+            if filename.endswith(".py"):
+                print(f"[INFO] 명령어 [{filename[:-3]:^15s}] 로드 완료")  # Log
+                self.load_extension(f"Cogs.{filename[:-3]}")
+
+    def add_music_channel(self, channel_id):
+        self.music_channel_list.append(channel_id)
 
     async def on_ready(self):
-        print("[INFO] Sky Whale Bot Activate")  # Log
+        print("[INFO] 하늘 고래 봇 시작")  # Log
 
         @tasks.loop(minutes=30)
         async def change_game():
@@ -23,29 +36,18 @@ class Whale(ComponentsBot):
 
         change_game.start()
 
-        for filename in os.listdir("Cogs"):
-            if filename.endswith(".py"):
-                print(f"[INFO] 명령어 [{filename[:-3]:^15s}] 로드 완료")  # Log
-                self.load_extension(f"Cogs.{filename[:-3]}")
-
         print("[INFO] 하늘 고래가 하늘을 납니다.")  # Log
 
     async def on_message(self, message: discord.Message):
         if message.author == self.user:
             return
 
-        # 음악 채널에 명령어를 사용하면 종료
-        if (
-            self.playlist_queue[message.guild.id]
-            and message.channel.id
-            == self.playlist_queue[message.guild.id].get_channel_id()
-        ):
-            if message.content.startswith("."):
+        if message.channel.id in self.music_channel_list:
+            if message.content.startswith(COMMAND_PREFIX):
                 return
 
-        if message.content.startswith("."):
+        if message.content.startswith(COMMAND_PREFIX):
             await self.process_commands(message)
-            return
 
     async def on_command_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.MissingPermissions):

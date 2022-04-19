@@ -3,6 +3,7 @@ __pycache__/
 .python-version
 .git
 token
+conf.json
 
 # Test Files
 test.py

@@ -1,30 +1,28 @@
-import discord
 import asyncio
 import youtube_dl
 from youtubesearchpython import VideosSearch
-from discord_components import Button, ButtonStyle
 
-from src.utils.embeds import Embed
+from Cogs.MusicComponents.playlist_embed import PlaylistEmbed
 
 
 class Youtube:
-    NUM_OF_SEARCH = 9
-    YDL_OPTS = {"format": "bestaudio", "quiet": False}
+    def __init__(self, bot):
+        self.bot = bot
+        self.NUM_OF_SEARCH = 9
+        self.YDL_OPTS = {"format": "bestaudio", "quiet": True}
 
-    @classmethod
-    def extract_info(cls, song):
-        with youtube_dl.YoutubeDL(cls.YDL_OPTS) as ydl:
+    def extract_info(self, song):
+        with youtube_dl.YoutubeDL(self.YDL_OPTS) as ydl:
             info = ydl.extract_info(song.link, download=False)
             mp3 = info["formats"][0]["url"]
 
         return mp3
 
-    @classmethod
-    async def search_and_select(cls, app, message):
-        info: dict = await app.loop.run_in_executor(
-            None, lambda: cls.search(cls, message.content)
+    async def search_and_select(self, message):
+        info: dict = await self.bot.loop.run_in_executor(
+            None, lambda: self.search(message.content)
         )
-        info = await cls.select(cls, app, message, info)
+        info = await self.select(message, info)
 
         return info
 
@@ -33,35 +31,21 @@ class Youtube:
 
         return info.result()["result"]
 
-    async def select(self, app, message, info):
+    async def select(self, message, info):
         def check(interaction):
             return (
                 message.author == interaction.user
                 and message.content in interaction.custom_id
             )
 
-        embed = Embed.search(message.content, info)
+        playlistEmbed = PlaylistEmbed()
 
-        components = []
-        for i in range(self.NUM_OF_SEARCH // 5 + 1):
-            component = []
-            for j in range(1, 6):
-                if i * 5 + j - 1 == self.NUM_OF_SEARCH:
-                    break
-                component.append(
-                    Button(label=i * 5 + j, custom_id=f"{message.content}{i*5 + j}")
-                )
-            components.append(component)
-        components[-1].append(
-            Button(
-                style=ButtonStyle.red, label="Cancel", custom_id=f"{message.content}c"
-            )
-        )
+        embed, components = playlistEmbed.search(message, info)
 
         msg = await message.reply(embed=embed, components=components)
 
         try:
-            res = await app.wait_for("button_click", check=check, timeout=15)
+            res = await self.bot.wait_for("button_click", check=check, timeout=15)
             select = res.component.label
             if select == "Cancel":
                 raise asyncio.exceptions.TimeoutError

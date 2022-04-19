@@ -1,105 +1,161 @@
 import asyncio
+from typing import Dict
 from discord.ext import commands
-from discord_components import DiscordComponents
 
-from Modules.Music.utils.embeds import Embed
-from Modules.Music.utils.components import Components
-from Modules.Music.components.playlist import Playlist
-from Modules.Music.components.youtube import Youtube
-from Modules.Music.components.queue import Queue
-from Modules.Music.components.song import Song
-from db import DB
+from Cogs.MusicComponents.playlist_embed import PlaylistEmbed
+from Cogs.MusicComponents.playlist import Playlist
+from Cogs.MusicComponents.youtube import Youtube
+from Cogs.MusicComponents.song import Song
+from src.db import DB
 
+INIT_MSG = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [1;35m향유[0m하기 시작했어요\n```"
 
-playlist_queue = Queue()
-msg = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [1;35m향유[0m하기 시작했어요\n```"
+db = DB()
 
 
 class Music(commands.Cog):
-    def __init__(self, app):
-        DiscordComponents(app)
+    guilds_playlist = {}
+    youtube = None
+
+    def __init__(self, bot):
         super().__init__()
-        self.app = app
-        self.db = DB()
+        self.bot = bot
+        self.playlist_embed: PlaylistEmbed = PlaylistEmbed()
+        self.guilds_playlist: Dict[int, Playlist] = {}
+        self.youtube = Youtube(bot)
 
     @commands.Cog.listener()
     async def on_ready(self):
-        guilds = self.db.select_all_music_channel()
-
-        for guild in guilds:
-            _, channel_id = guild
-
-            channel = self.app.get_channel(channel_id)
-            await Music._init_channel(self.app, channel)
-
-        print("Music bot init done")
+        servers = db.select_all_music_channel()
+        for guild_id, channel_id in servers:
+            guild = self.bot.get_guild(guild_id)
+            channel = self.bot.get_channel(channel_id)
+            await self.__handle_init_channel(channel)
+            print(
+                f"[INFO] [{guild.name:^10s}] 길드 [{channel.name:^10s}] 채널 음악 봇 초기화 완료"
+            )  # Log
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.app.user:
+        if message.author == self.bot.user:
             return
 
-        if (
-            playlist_queue[message.guild.id]
-            and message.channel.id == playlist_queue[message.guild.id].get_channel_id()
-        ):
-            if message.content == ".초기화":
-                await self.app.process_commands(message)
-                return
+        if message.channel.id not in self.bot.music_channel_list:
+            return
 
-            if message.content.startswith("."):
-                pass
+        if message.content == ".초기화":
+            await self.bot.process_commands(message)
+            return
 
-            if message.author.voice is None:
-                await message.channel.send("음성 채널에 들어가서 사용해주세요", delete_after=3)
-                await asyncio.sleep(3)
-                return await message.delete()
+        if message.content.startswith("."):
+            pass
 
-            if "youtube.com" in message.content:
-                # Yotube play
-                await message.channel.send("youtube 주소 검색 기능은 구현중입니다..", delete_after=3)
-                return
+        if message.author.voice is None:
+            await message.channel.send("음성 채널에 들어가서 사용해주세요", delete_after=3)
+            await asyncio.sleep(3)
+            return await message.delete()
 
-            if (info := await Youtube.search_and_select(self.app, message)) is None:
-                return
+        if "youtube.com" in message.content:
+            await message.channel.send("youtube 주소 검색 기능은 구현중입니다...", delete_after=3)
+            return
 
-            song = Song(info)
+        if (info := await self.youtube.search_and_select(message)) is None:
+            return
 
-            playlist: Playlist = playlist_queue[message.guild.id]
-            await playlist.play(message, song)
+        song = Song(info)
+
+        playlist = self.guilds_playlist[message.guild.id]
+        await playlist.play(message, song)
+
+    @classmethod
+    async def search(cls, message):
+        if "youtube.com" in message.content:
+            await message.channel.send("youtube 주소 검색 기능은 구현중이니다...", delete_after=3)
+            return
+
+        if (info := await cls.youtube.search_and_select(message)) is None:
+            return
+
+        song = Song(info)
+        playlist = cls.guilds_playlist[message.guild.id]
+        await playlist.play(message, song)
 
     @commands.command("초기화")
     @commands.has_permissions(administrator=True)
-    async def init(self, ctx):
+    async def init(self, ctx) -> None:
         async def callback(interaction):
             if interaction.user == ctx.author:
-                if self.db.select_music_channel(ctx.guild.id):
-                    self.db.delete_music_channel(ctx.guild.id)
-                self.db.insert_music_channel(ctx.guild.id, ctx.channel.id)
-                await Music._init_channel(self.app, ctx.channel)
+                if db.select_music_channel(ctx.guild.id):
+                    db.delete_music_channel(ctx.guild.id)
+                db.insert_music_channel(ctx.guild.id, ctx.channel.id)
+            await self.__handle_init_channel(ctx.channel)
 
-        embed = Embed.init()
-        components = Components.init()[0]
+        embed, components = self.playlist_embed.init()
+        components = [
+            self.bot.components_manager.add_callback(component, callback)
+            for component in components
+        ]
+        await ctx.send(embed=embed, components=components, delete_after=5)
 
-        await ctx.send(
-            embed=embed,
-            components=[
-                self.app.components_manager.add_callback(components, callback),
-            ],
-            delete_after=5,
-        )
-        await ctx.message.delete(delay=5)
+    async def __handle_init_channel(self, channel):
+        async def callback(interaction):
+            playlist = self.guilds_playlist[interaction.guild.id]
+            custom_id = interaction.custom_id
 
-    @classmethod
-    async def _init_channel(cls, app, channel):
+            if custom_id == "pause":
+                playlist.pause()
+                await interaction.send(
+                    f"{interaction.author.name} 님이 일시정지를 했습니다.",
+                    delete_after=3,
+                    ephemeral=False,
+                )
+            elif custom_id == "resume":
+                playlist.resume()
+                await interaction.send(
+                    f"{interaction.author.name} 님이 일시정지를 풀었습니다.",
+                    delete_after=3,
+                    ephemeral=False,
+                )
+            elif custom_id == "shuffle":
+                await playlist.shuffle()
+                await interaction.send(
+                    f"{interaction.author.name}", delete_after=3, ephemeral=False
+                )
+            elif custom_id == "help":
+                playlist.help()
+                return
+            elif custom_id == "skip":
+                await playlist.skip()
+                return
+            elif custom_id == "prev_page":
+                await playlist.prev_page()
+            elif custom_id == "next_page":
+                await playlist.next_page()
+            elif custom_id == "first_page":
+                await playlist.first_page()
+            elif custom_id == "last_page":
+                await playlist.last_page()
+            elif custom_id == "Youtube":
+                await playlist.youtube()
+
         await channel.purge()
-        playlist_msg = await channel.send(msg)
+        playlist = Playlist(text_channel=channel)
 
-        playlist = Playlist(app=app, channel=channel, playlist_msg=playlist_msg)
-        await playlist.update_playlist()
+        embed, components_list = self.playlist_embed.playlist(playlist)
+        components = [
+            [
+                self.bot.components_manager.add_callback(component, callback)
+                for component in components
+            ]
+            for components in components_list
+        ]
+        playlist_msg = await channel.send(embed=embed, components=components)
 
-        playlist_queue[channel.guild.id] = playlist
+        playlist.set_playlist_msg(playlist_msg)
+
+        self.guilds_playlist[channel.guild.id] = playlist
+        self.bot.add_music_channel(channel.id)
 
 
-def setup(app):
-    app.add_cog(Music(app))
+def setup(bot):
+    bot.add_cog(Music(bot))

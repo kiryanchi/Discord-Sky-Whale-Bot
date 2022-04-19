@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 
-DB_FILE = "./src/sky_whale_bot.db"
+DB_FILE = "./sky_whale_bot.db"
 
 
 class DB:

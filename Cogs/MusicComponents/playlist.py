@@ -1,22 +1,22 @@
 import discord
 import asyncio
 import random
+import youtube_dl
 
-from src.utils.components import Components
-from src.utils.embeds import Embed
+from Cogs.MusicComponents.playlist_embed import PlaylistEmbed
 
 SPACE = "\u17B5"
 
 
 class Playlist:
-    def __init__(self, app, channel, playlist_msg):
+    def __init__(self, text_channel):
+        self.YDL_OPTS = {"format": "bestaudio", "quiet": False}
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
         }
-        self.app = app
-        self.channel = channel
-        self.playlist_msg = playlist_msg
+        self.text_channel = text_channel
+        self.playlist_msg = None
         self.voice_channel = None
         self.voice_client = None
         self.queue = {
@@ -26,6 +26,10 @@ class Playlist:
         self.playing = False
         self.current_page = 0
         self.max_page = 0
+        self.playlist_embed = PlaylistEmbed()
+
+    def set_playlist_msg(self, playlist_msg):
+        self.playlist_msg = playlist_msg
 
     def pause(self):
         if self.voice_client is None:
@@ -100,19 +104,15 @@ class Playlist:
         await self._update_playlist_message()
 
     async def _update_playlist_message(self):
-        current_song_message = self._make_current_song_embed_message()
-        next_songs_message = self._make_next_songs_embed_message()
-        await self.playlist_msg.edit(
-            embed=Embed.playlist(current_song_message, next_songs_message),
-            components=Components.playlist(self.app),
-        )
+        embed, components = self.playlist_embed.playlist(playlist=self)
+        await self.playlist_msg.edit(embed=embed, components=components)
 
-    def _make_current_song_embed_message(self):
+    def make_current_song_embed_message(self):
         if (song := self.get_current_song()) is None:
             return "재생중인 노래가 없습니다."
         return song.title
 
-    def _make_next_songs_embed_message(self):
+    def make_next_songs_embed_message(self):
         next_song_list = self.get_next_songs()
         song_list = []
         try:
@@ -129,7 +129,7 @@ class Playlist:
         song_list = [*song_list, *append_song_list]
         text = ""
         for i in range(len(song_list)):
-            tmp = Embed.wrap(song_list[i])
+            tmp = self.playlist_embed.wrap(text=song_list[i])
             text += f"> {SPACE}[{self.current_page * 10 + i + 1}] {tmp}\n"
         text += f"> {SPACE}{SPACE}{SPACE}{SPACE}\n"
         text += f"> {SPACE} 현재 페이지 {self.current_page + 1} / {self.max_page + 1}"
@@ -172,16 +172,23 @@ class Playlist:
         self.set_current_song(song)
         self.playing = True
         await self.update_playlist()
+
+        with youtube_dl.YoutubeDL(self.YDL_OPTS) as ydl:
+            info = ydl.extract_info(song.link, download=False)
+            mp3 = info["formats"][0]["url"]
+
         try:
             self.voice_client.play(
                 discord.PCMVolumeTransformer(
-                    discord.FFmpegPCMAudio(song.mp3, **self.FFMPEG_OPTIONS)
+                    discord.FFmpegPCMAudio(mp3, **self.FFMPEG_OPTIONS)
                 ),
                 after=lambda error: self.app.loop.create_task(self._check_queue()),
             )
         except discord.opus.OpusNotLoaded:
+            print(
+                f"[{self.text_channel.guild.name:^15s}] 길드에서 [{self.text_channel.name:^15s}] 채널에서 [{song.title}] 재생 실패함 "
+            )  # Log
             await asyncio.sleep(20)
-            print(f"{song.title} played")
             await self._check_queue()
 
         # DELETE
