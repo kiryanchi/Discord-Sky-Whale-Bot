@@ -125,8 +125,11 @@ class Music(commands.Cog):
                 await playlist.first_page()
             elif custom_id == "last_page":
                 await playlist.last_page()
-            elif custom_id == "Youtube":
-                await playlist.youtube()
+            elif custom_id == "yt":
+                link = playlist.youtube()
+                await interaction.send(
+                    f"Youtube : {link}", delete_after=30, ephemeral=True
+                )
 
         await channel.purge()
         playlist = Playlist(bot=self.bot, text_channel=channel)

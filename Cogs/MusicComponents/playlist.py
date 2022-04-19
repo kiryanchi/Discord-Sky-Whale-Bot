@@ -81,7 +81,8 @@ class Playlist:
             await self.update_playlist()
 
     async def youtube(self):
-        pass
+        if song := self.get_current_song():
+            return song.link
 
     def get_channel_id(self):
         return self.channel.id
