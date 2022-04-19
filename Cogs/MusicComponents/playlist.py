@@ -3,6 +3,8 @@ import asyncio
 import random
 import youtube_dl
 
+from discord.ext import tasks
+
 from Cogs.MusicComponents.playlist_embed import PlaylistEmbed
 
 SPACE = "\u17B5"
@@ -28,6 +30,7 @@ class Playlist:
         self.current_page = 0
         self.max_page = 0
         self.playlist_embed = PlaylistEmbed()
+        self.leave_flag = False
 
     def set_playlist_msg(self, playlist_msg):
         self.playlist_msg = playlist_msg
@@ -157,15 +160,23 @@ class Playlist:
         self.voice_channel = voice_channel
         await self.voice_client.move_to(self.voice_channel)
 
+    @tasks.loop(seconds=2.0, count=150)
+    async def wait_for_5minutes(self):
+        self.leave_flag = True
+
+    @wait_for_5minutes.after_loop
     async def leave(self):
         await self.voice_client.disconnect()
         self.reset_voice_status()
 
     async def _check_queue(self):
         if not self.get_next_songs():
-            await self.leave()
             await self.update_playlist()
+            self.wait_for_5minutes.start()
             return
+        if self.leave_flag:
+            self.leave_flag = False
+            self.wait_for_5minutes.cancel()
         self.voice_client.stop()
         await self._play_song()
 
@@ -194,12 +205,8 @@ class Playlist:
                 f"[WARNING] [{self.text_channel.guild.name:^15s}] 길드에서 [{self.text_channel.name:^15s}] 채널에서 [{song.title}] 재생 실패함 "
             )  # Log
             await asyncio.sleep(20)
+            print("play done")
             await self._check_queue()
-
-        # DELETE
-        # await asyncio.sleep(30)
-        # await self._check_queue()
-        # // DELETE
 
     async def play(self, message, song):
         # 노래를 추가한다
