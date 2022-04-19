@@ -27,13 +27,14 @@ class Music(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         servers = db.select_all_music_channel()
-        for guild_id, channel_id in servers:
-            guild = self.bot.get_guild(guild_id)
-            channel = self.bot.get_channel(channel_id)
-            await self.__handle_init_channel(channel)
-            print(
-                f"[INFO] [{guild.name:^10s}] 길드 [{channel.name:^10s}] 채널 음악 봇 초기화 완료"
-            )  # Log
+        if servers:
+            for guild_id, channel_id in servers:
+                guild = self.bot.get_guild(guild_id)
+                channel = self.bot.get_channel(channel_id)
+                await self.__handle_init_channel(channel)
+                print(
+                    f"[INFO] [{guild.name:^10s}] 길드 [{channel.name:^10s}] 채널 음악 봇 초기화 완료"
+                )  # Log
 
     @commands.Cog.listener()
     async def on_message(self, message):
