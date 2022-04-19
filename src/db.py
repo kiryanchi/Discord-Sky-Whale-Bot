@@ -13,11 +13,10 @@ class DB:
         return cls._instance
 
     def __init__(self):
-        if not os.path.isfile(DB_FILE):
-            self.make_db_file()
-
         self.con = sqlite3.connect(DB_FILE)
         self.cursor = self.con.cursor()
+        if not os.path.isfile(DB_FILE):
+            self.make_db_file()
 
     def make_db_file(self):
         query_string = "CREATE TABLE music_channel(guild_id int, channel_id int)"
