@@ -169,11 +169,14 @@ class Player:
         if self._voice["client"] and self._voice["client"].is_paused():
             self._voice["client"].resume()
 
-    def skip(self):
+    async def skip(self):
         if self._voice["client"] is None:
+            print('skip 할게 없음')
             return
         if self._playing:
-            self._check_queue()
+            print('skip')
+
+            await self._check_queue()
 
     async def play(self, message, song):
         if self._voice["client"] is None:
@@ -202,6 +205,7 @@ class Player:
             await self._leave()
             return
         self._voice["client"].stop()
+        print(self._voice['client'])
         await self._play_song(self._get_song())
 
     def _get_song(self):
@@ -390,7 +394,7 @@ class Playlist(commands.Cog):
 
     async def _pause(self, interaction):
         self.players[interaction.guild].pause()
-        await interaction.reply(
+        await interaction.send(
             f"{interaction.author.name} 님이 일시정지 했습니다.", delete_after=3, ephemeral=False
         )
 
@@ -399,7 +403,7 @@ class Playlist(commands.Cog):
 
     async def _resume(self, interaction):
         self.players[interaction.guild].resume()
-        await interaction.reply(
+        await interaction.send(
             f"{interaction.author.name} 님이 일지정지를 풀었습니다.",
             delete_after=3,
             ephemeral=False,
@@ -441,15 +445,15 @@ class Playlist(commands.Cog):
 
     async def _shuffle(self, interaction):
         self.players[interaction.guild].shuffle()
-        await interaction.reply(
+        await interaction.send(
             f"{interaction.author.name} 님이 재생목록을 흔들었습니다.",
             delete_after=3,
             ephemeral=False,
         )
 
     async def _skip(self, interaction):
-        self.players[interaction.guild].skip()
-        await interaction.reply(
+        await self.players[interaction.guild].skip()
+        await interaction.send(
             f"{interaction.author.name} 님이 노래를 스킵했습니다.", delete_after=3, ephemeral=False
         )
 
