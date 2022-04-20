@@ -1,6 +1,7 @@
 import re
 import discord
 import asyncio
+import random
 from discord.ext import commands
 
 from discord_components import Button, ButtonStyle
@@ -169,7 +170,10 @@ class Player:
             self._voice["client"].resume()
 
     def skip(self):
-        pass
+        if self._voice["client"] is None:
+            return
+        if self._playing:
+            self._check_queue()
 
     async def play(self, message, song):
         if self._voice["client"] is None:
@@ -220,25 +224,30 @@ class Player:
         self._songs["current"] = song
 
         try:
-            print(f"[INFO] [{self.playlist_channel.guild.name}] 길드에서 [{self.playlist_channel.name}] 채널에서 [{song.title}] 재생함")
+            print(
+                f"[INFO] [{self.playlist_channel.guild.name}] 길드에서 [{self.playlist_channel.name}] 채널에서 [{song.title}] 재생함"
+            )
             self._voice["client"].play(
                 discord.PCMVolumeTransformer(
                     discord.FFmpegPCMAudio(song.url, **self.FFMPEG_OPTIONS)
                 ),
-                after=lambda error: self._loop.create_task(
-                    self._check_queue()
-                ),
+                after=lambda error: self._loop.create_task(self._check_queue()),
             )
             self.pause()
             await asyncio.sleep(1)
             self.resume()
         except discord.opus.OpusNotLoaded:
-            print(f"[INFO] [{self.playlist_channel.guild.name}] 길드에서 [{self.playlist_channel.name}] 채널에서 [{song.title}] 재생실패함")
+            print(
+                f"[INFO] [{self.playlist_channel.guild.name}] 길드에서 [{self.playlist_channel.name}] 채널에서 [{song.title}] 재생실패함"
+            )
             await asyncio.sleep(10)
             await self._check_queue()
 
     def _same_voice_channel(self, voice_channel):
         return self._voice["channel"] == voice_channel
+
+    def _shuffle(self):
+        random.shuffle(self._songs["next"])
 
 
 class Youtube:
@@ -380,13 +389,21 @@ class Playlist(commands.Cog):
         pass
 
     async def _pause(self, interaction):
-        pass
+        self.players[interaction.guild].pause()
+        await interaction.reply(
+            f"{interaction.author.name} 님이 일시정지 했습니다.", delete_after=3, ephemeral=False
+        )
 
     async def _prev(self, interaction):
         pass
 
     async def _resume(self, interaction):
-        pass
+        self.players[interaction.guild].resume()
+        await interaction.reply(
+            f"{interaction.author.name} 님이 일지정지를 풀었습니다.",
+            delete_after=3,
+            ephemeral=False,
+        )
 
     async def _select_youtube_link(self, message):
         result = await Youtube.search(title=message.content)
@@ -423,10 +440,18 @@ class Playlist(commands.Cog):
         return link
 
     async def _shuffle(self, interaction):
-        pass
+        self.players[interaction.guild].shuffle()
+        await interaction.reply(
+            f"{interaction.author.name} 님이 재생목록을 흔들었습니다.",
+            delete_after=3,
+            ephemeral=False,
+        )
 
     async def _skip(self, interaction):
-        pass
+        self.players[interaction.guild].skip()
+        await interaction.reply(
+            f"{interaction.author.name} 님이 노래를 스킵했습니다.", delete_after=3, ephemeral=False
+        )
 
 
 def setup(bot):
