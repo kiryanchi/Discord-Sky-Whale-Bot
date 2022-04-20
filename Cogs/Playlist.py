@@ -158,8 +158,7 @@ class Youtube:
 
     @classmethod
     async def search(cls, title):
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
+        result = await asyncio.get_event_loop().run_in_executor(
             None, lambda: VideosSearch(title, limit=cls.NUM_OF_SEARCH)
         )
 
@@ -202,41 +201,13 @@ class Playlist(commands.Cog):
             await message.delete()
             return
 
+        if "list=" in message.content:
+            return await message.channel.send("재생목록은 넣을 수 없습니다.", delete_after=3)
+
         if not self._check_youtube_link(message.content):
-            result = await Youtube.search(title=message.content)
-            embed, components = Embed.search(message.content, result)
-
-            # 유튜브 검색 후 9개 뽑아옴
-
-            select_message = await message.channel.send(
-                embed=embed, components=components
-            )
-
-            try:
-                res = await self.bot.wait_for(
-                    "button_click",
-                    check=(
-                        lambda interaction: message.author == interaction.user
-                        and message.content in interaction.custom_id
-                    ),
-                    timeout=15,
-                )
-                select = res.component.label
-                if select == "Cancel":
-                    raise asyncio.exceptions.TimeoutError
-                else:
-                    select = int(select)
-
-            except asyncio.exceptions.TimeoutError:
-                await select_message.delete()
-                await message.channel.send("노래 선택이 취소되었습니다.", delete_after=5)
-                return
-
-            link = f"https://youtu.be/{result[select - 1]['id']}"
+            link = await self._select_youtube_link(message)
 
         if "youtube.com" in message.content:
-            if "list=" in message.content:
-                return await message.channel.send("재생목록은 넣을 수 없습니다.", delete_after=3)
             link = message.content
 
         if "youtu.be" in message.content:
@@ -244,6 +215,7 @@ class Playlist(commands.Cog):
 
         song = Youtube.extract_info(link=link)
         print(song)
+        await message.delete()
 
     @commands.command(neme="초기화", help="이 채널을 음악봇이 사용합니다.")
     @commands.has_permissions(administrator=True)
@@ -315,6 +287,40 @@ class Playlist(commands.Cog):
 
     async def _resume(self, interaction):
         pass
+
+    async def _select_youtube_link(self, message):
+        result = await Youtube.search(title=message.content)
+        embed, components = Embed.search(message.content, result)
+
+        # 유튜브 검색 후 9개 뽑아옴
+
+        select_message = await message.channel.send(embed=embed, components=components)
+
+        try:
+            res = await self.bot.wait_for(
+                "button_click",
+                check=(
+                    lambda interaction: message.author == interaction.user
+                    and message.content in interaction.custom_id
+                ),
+                timeout=15,
+            )
+            select = res.component.label
+            if select == "Cancel":
+                raise asyncio.exceptions.TimeoutError
+            else:
+                select = int(select)
+
+        except asyncio.exceptions.TimeoutError:
+            await select_message.delete()
+            await message.channel.send("노래 선택이 취소되었습니다.", delete_after=5)
+            return
+
+        await select_message.delete()
+
+        link = f"https://youtu.be/{result[select - 1]['id']}"
+
+        return link
 
     async def _shuffle(self, interaction):
         pass
