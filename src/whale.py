@@ -5,19 +5,17 @@ from discord_components import ComponentsBot
 from itertools import cycle
 
 from src.db import DB
-from Cogs.Music import Music
 
 GAME_LIST = cycle(["재획", "유튜브 검색", "일", "모교는"])
-COMMAND_PREFIX = "."
-
-
-db = DB()
 
 
 class Whale(ComponentsBot):
-    def __init__(self, command_prefix: str, intents: discord.Intents, env: str):
-        super().__init__(command_prefix=command_prefix, intents=intents)
+    def __init__(self, command_prefix, intents, environment):
+        super().__init__(
+            command_prefix=environment["default_command_prefix"], intents=intents
+        )
         self.music_channel_list = []
+        self.db = DB(environment["db"])
 
         self.remove_command("help")
 
@@ -45,10 +43,10 @@ class Whale(ComponentsBot):
             return
 
         if message.channel.id in self.music_channel_list:
-            if message.content.startswith(COMMAND_PREFIX):
+            if message.content.startswith(self.command_prefix):
                 return
 
-        if message.content.startswith(COMMAND_PREFIX):
+        if message.content.startswith(self.command_prefix):
             await self.process_commands(message)
 
     async def on_command_error(self, ctx: commands.Context, error):

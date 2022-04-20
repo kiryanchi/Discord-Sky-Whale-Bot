@@ -2,9 +2,6 @@ import sqlite3
 import os
 
 
-DB_FILE = "./sky_whale_bot.db"
-
-
 class DB:
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "_instance"):
@@ -12,10 +9,11 @@ class DB:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
-        self.con = sqlite3.connect(DB_FILE)
+    def __init__(self, db):
+        print(db)
+        self.con = sqlite3.connect(db)
         self.cursor = self.con.cursor()
-        if not os.path.isfile(DB_FILE):
+        if not os.path.isfile(db):
             self.make_db_file()
 
     def make_db_file(self):
