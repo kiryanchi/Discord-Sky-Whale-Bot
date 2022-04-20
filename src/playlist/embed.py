@@ -47,16 +47,16 @@ class Embed:
         return embed, components
 
     @staticmethod
-    def search(message, info):
+    def search(title, search):
         NUM_OF_SEARCH = 9
-        embed = discord.Embed(
-            title=f"{message.content} 검색 결과", color=COLOR
-        ).set_thumbnail(url=URL)
+        embed = discord.Embed(title=f"{title} 검색 결과", color=COLOR).set_thumbnail(
+            url=URL
+        )
 
-        for i in range(len(info)):
+        for i in range(len(search)):
             embed.add_field(
-                name=f"{i+1:2d}번\t({info[i]['duration']}) {info[i]['channel']['name']}",
-                value=f"제목: {info[i]['title']}",
+                name=f"{i+1:2d}번\t({search[i]['duration']}) {search[i]['channel']['name']}",
+                value=f"제목: {search[i]['title']}",
                 inline=False,
             )
 
@@ -67,14 +67,10 @@ class Embed:
             for j in range(1, 6):
                 if i * 5 + j - 1 == NUM_OF_SEARCH:
                     break
-                component.append(
-                    Button(label=i * 5 + j, custom_id=f"{message.content}{i*5 + j}")
-                )
+                component.append(Button(label=i * 5 + j, custom_id=f"{title}{i*5 + j}"))
             components.append(component)
         components[-1].append(
-            Button(
-                style=ButtonStyle.red, label="Cancel", custom_id=f"{message.content}c"
-            )
+            Button(style=ButtonStyle.red, label="Cancel", custom_id=f"{title}c")
         )
 
         return embed, components
