@@ -43,7 +43,7 @@ class Embed:
         return result_text
 
     @staticmethod
-    def start(self):
+    def start():
         embed = (
             discord.Embed(title="하늘 고래가 이 곳을 떠다니고 싶어합니다.", color=COLOR)
             .set_image(url=URL)
@@ -313,7 +313,7 @@ class Playlist(commands.Cog):
 
         await message.delete()
 
-    @commands.command(neme="초기화", help="이 채널을 음악봇이 사용합니다.")
+    @commands.command(name="초기화", help="이 채널을 음악봇이 사용합니다.")
     @commands.has_permissions(administrator=True)
     async def start(self, ctx):
         async def callback(interaction):
