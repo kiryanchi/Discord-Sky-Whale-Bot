@@ -125,7 +125,7 @@ class Song:
         self._url = url
 
     def __str__(self):
-        return f'{{"id": {self._id}, "title": {self._title}, "url": {self._url}}}'
+        return dict({"id": self._id, "title": self._title, "url": self._url})
 
     @property
     def id(self):
