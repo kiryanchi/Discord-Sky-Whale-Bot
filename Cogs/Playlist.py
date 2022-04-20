@@ -141,11 +141,12 @@ class Song:
 
 
 class Player:
-    def __init__(self, playlist_channel):
+    def __init__(self, loop, playlist_channel):
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
         }
+        self._loop = loop
         self._playing = False
         self.playlist_channel = playlist_channel
         self._playlist_msg = None
@@ -160,11 +161,11 @@ class Player:
         self._playlist_msg = msg
 
     def pause(self):
-        if self._voice["client"] and not self.voice["client"].is_paused():
+        if self._voice["client"] and not self._voice["client"].is_paused():
             self._voice["client"].pause()
 
     def resume(self):
-        if self._voice["client"] and self.voice["client"].is_paused():
+        if self._voice["client"] and self._voice["client"].is_paused():
             self._voice["client"].resume()
 
     def skip(self):
@@ -177,9 +178,10 @@ class Player:
         if self._playing:
             self._add_song(song)
             if not self._same_voice_channel(message.author.voice.channel):
-                return await message.channel.send(
+                await message.channel.send(
                     "노래를 추가했어요! 하지만 채널이 다르신 것 같아요.. 노래를 듣고싶다면 제가 있는 채널에 들어와주세요!"
                 )
+            return
 
         if not self._same_voice_channel(message.author.voice.channel):
             await self._move(message.author.voice.channel)
@@ -218,11 +220,12 @@ class Player:
         self._songs["current"] = song
 
         try:
+            print(f"[INFO] [{self.playlist_channel.guild.name}] 길드에서 [{self.playlist_channel.name}] 채널에서 [{song.title}] 재생함")
             self._voice["client"].play(
                 discord.PCMVolumeTransformer(
                     discord.FFmpegPCMAudio(song.url, **self.FFMPEG_OPTIONS)
                 ),
-                after=lambda error: asyncio.get_event_loop().create_task(
+                after=lambda error: self._loop.create_task(
                     self._check_queue()
                 ),
             )
@@ -230,9 +233,8 @@ class Player:
             await asyncio.sleep(1)
             self.resume()
         except discord.opus.OpusNotLoaded:
-            print(f"{song.title} play")
+            print(f"[INFO] [{self.playlist_channel.guild.name}] 길드에서 [{self.playlist_channel.name}] 채널에서 [{song.title}] 재생실패함")
             await asyncio.sleep(10)
-            print("play done")
             await self._check_queue()
 
     def _same_voice_channel(self, voice_channel):
@@ -300,11 +302,7 @@ class Playlist(commands.Cog):
 
         if not self._check_youtube_link(message.content):
             link = await self._select_youtube_link(message)
-
-        if "youtube.com" in message.content:
-            link = message.content
-
-        if "youtu.be" in message.content:
+        else:
             link = message.content
 
         await self.players[message.guild].play(
@@ -347,7 +345,7 @@ class Playlist(commands.Cog):
                 "first": self._first,
                 "last": self._last,
             }
-            await actions[interaction.custom_id]()
+            await actions[interaction.custom_id](interaction)
 
         await channel.purge()
 
@@ -365,10 +363,12 @@ class Playlist(commands.Cog):
             self.bot.music_channel_list.remove(channel)
         self.bot.music_channel_list.append(channel)
 
-        player = Player(playlist_channel=channel)
+        player = Player(loop=self.bot.loop, playlist_channel=channel)
         playlist_msg = await channel.send(embed=embed, components=components)
         player.set_playlist_msg(playlist_msg)
         self.players[channel.guild] = player
+
+        print(f"[INFO] [{channel.guild.name}] 길드 [{channel.name}] 채널 음악 봇 초기화 완료")
 
     async def _first(self, interaction):
         pass
