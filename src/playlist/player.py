@@ -107,9 +107,12 @@ class Player:
         )
 
     async def youtube(self, interaction):
-        await interaction.send(
-            f"Youtbe Link: https://youtu.be/{self._songs['current'].id}"
-        )
+        if self._songs["curent"]:
+            await interaction.send(
+                f"Youtbe Link: https://youtu.be/{self._songs['current'].id}"
+            )
+        else:
+            await interaction.send("재생중인 곡이 없어요.")
 
     async def _add_song(self, song):
         self._songs["next"].append(song)
