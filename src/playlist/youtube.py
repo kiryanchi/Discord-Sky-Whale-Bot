@@ -4,6 +4,7 @@ from youtubesearchpython import VideosSearch
 
 from src.playlist.song import Song
 
+
 class Youtube:
     NUM_OF_SEARCH = 9
     YDL_OPTS = {"format": "bestaudio/best", "quiet": True}

@@ -93,67 +93,21 @@ class Playlist(commands.Cog):
             return True
 
     async def _create_playlist(self, channel):
-        async def callback(interaction):
-            actions = {
-                "pause": self._pause,
-                "resume": self._resume,
-                "shuffle": self._shuffle,
-                "skip": self._skip,
-                "prev": self._prev,
-                "next": self._next,
-                "first": self._first,
-                "last": self._last,
-            }
-            await actions[interaction.custom_id](interaction)
-
         await channel.purge()
-
-        embed, components_list = Embed.playlist()
-
-        components = [
-            [
-                self.bot.components_manager.add_callback(component, callback)
-                for component in components
-            ]
-            for components in components_list
-        ]
 
         if channel in self.bot.music_channel_list:
             self.bot.music_channel_list.remove(channel)
         self.bot.music_channel_list.append(channel)
 
-        player = Player(playlist_channel=channel)
-        playlist_msg = await channel.send(embed=embed, components=components)
-        player.set_playlist_msg(playlist_msg)
+        playlist_msg = await channel.send(Player.INIT_MSG)
+        player = Player(
+            bot=self.bot, playlist_channel=channel, playlist_msg=playlist_msg
+        )
+        await player.init()
+
         self.players[channel.guild] = player
 
         print(f"[INFO] [{channel.guild.name}] 길드 [{channel.name}] 채널 음악 봇 초기화 완료")
-
-    async def _first(self, interaction):
-        pass
-
-    async def _next(self, interaction):
-        pass
-
-    async def _last(self, interaction):
-        pass
-
-    async def _pause(self, interaction):
-        self.players[interaction.guild].pause()
-        await interaction.send(
-            f"{interaction.author.name} 님이 일시정지 했습니다.", delete_after=3, ephemeral=False
-        )
-
-    async def _prev(self, interaction):
-        pass
-
-    async def _resume(self, interaction):
-        self.players[interaction.guild].resume()
-        await interaction.send(
-            f"{interaction.author.name} 님이 일지정지를 풀었습니다.",
-            delete_after=3,
-            ephemeral=False,
-        )
 
     async def _select_youtube_link(self, message):
         result = await Youtube.search(title=message.content)
@@ -188,20 +142,6 @@ class Playlist(commands.Cog):
         link = f"https://youtu.be/{result[select - 1]['id']}"
 
         return link
-
-    async def _shuffle(self, interaction):
-        self.players[interaction.guild].shuffle()
-        await interaction.send(
-            f"{interaction.author.name} 님이 재생목록을 흔들었습니다.",
-            delete_after=3,
-            ephemeral=False,
-        )
-
-    async def _skip(self, interaction):
-        await self.players[interaction.guild].skip()
-        await interaction.send(
-            f"{interaction.author.name} 님이 노래를 스킵했습니다.", delete_after=3, ephemeral=False
-        )
 
 
 def setup(bot):
