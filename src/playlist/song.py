@@ -1,21 +1,20 @@
 class Song:
-    def __init__(self, info):
-        self.__info = info
-        self.__title = info["title"]
-        self.__link = info["link"]
-        self.__thumbnail = info["thumbnails"][0]["url"]
+    def __init__(self, id, title, url):
+        self._id = id
+        self._title = title
+        self._url = url
+
+    def __str__(self):
+        return dict({"id": self._id, "title": self._title, "url": self._url})
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def title(self):
-        return self.__title
+        return self._title
 
     @property
-    def link(self):
-        return self.__link
-
-    @property
-    def thumbnail(self):
-        return self.__thumbnail
-
-    def __str__(self):
-        return self.__info
+    def url(self):
+        return self._url

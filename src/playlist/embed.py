@@ -33,7 +33,7 @@ class Embed:
         return result_text
 
     @staticmethod
-    def start(self):
+    def start():
         embed = (
             discord.Embed(title="하늘 고래가 이 곳을 떠다니고 싶어합니다.", color=COLOR)
             .set_image(url=URL)
