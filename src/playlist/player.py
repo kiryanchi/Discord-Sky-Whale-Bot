@@ -49,6 +49,9 @@ class Player:
     async def init(self):
         await self._update_playlist()
 
+    async def help(self, interaction):
+        await interaction.send("봇 사용법 추가 예정입니다.", delete_after=5)
+
     async def last(self, interaction):
         await self._last()
         await interaction.send("마지막 페이지", delete_after=0.1, ephemeral=False)

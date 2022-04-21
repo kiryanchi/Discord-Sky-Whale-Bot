@@ -109,6 +109,7 @@ class Embed:
         async def callback(interaction):
             actions = {
                 "first": player.first,
+                "help": player.help,
                 "last": player.last,
                 "next": player.next,
                 "pause": player.pause,
