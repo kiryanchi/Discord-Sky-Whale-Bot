@@ -57,19 +57,6 @@ class Playlist(commands.Cog):
 
         await message.delete()
 
-    @commands.command(name="test")
-    async def test(self, ctx):
-        rains = [
-            "https://www.youtube.com/watch?v=a1vPy2TX-us",
-            "https://www.youtube.com/watch?v=a1vPy2TX-us",
-            "https://www.youtube.com/watch?v=a1vPy2TX-us",
-            "https://www.youtube.com/watch?v=a1vPy2TX-us",
-        ]
-        for link in rains:
-            await self.players[ctx.message.guild].play(
-                message=ctx.message, song=Youtube.extract_info(link=link)
-            )
-
     @commands.command(name="초기화", help="이 채널을 음악봇이 사용합니다.")
     @commands.has_permissions(administrator=True)
     async def start(self, ctx):
