@@ -93,7 +93,7 @@ class Player:
         )
 
     async def shuffle(self, interaction):
-        self._shuffle()
+        await self._shuffle()
         await interaction.send(
             f"{interaction.author.name} 님이 재생목록을 흔들었습니다.",
             delete_after=3,
@@ -200,8 +200,9 @@ class Player:
     def _same_voice_channel(self, voice_channel):
         return self._voice["channel"] == voice_channel
 
-    def _shuffle(self):
+    async def _shuffle(self):
         random.shuffle(self._songs["next"])
+        await self._update_playlist()
 
     async def _skip(self):
         if self._voice["client"] is None:
