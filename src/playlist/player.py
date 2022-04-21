@@ -111,7 +111,7 @@ class Player:
         )
 
     async def youtube(self, interaction):
-        if self._songs["curent"]:
+        if self._songs["current"]:
             await interaction.send(
                 f"Youtbe Link: https://youtu.be/{self._songs['current'].id}"
             )
