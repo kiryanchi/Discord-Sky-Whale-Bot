@@ -11,17 +11,17 @@ from src.playlist.youtube import Youtube
 
 
 class Player:
-    def __init__(self, loop, playlist_channel):
+    def __init__(self, playlist_channel):
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn",
         }
-        self._loop = loop
+        self._loop = asyncio.get_running_loop()
         self._playing = False
         self.playlist_channel = playlist_channel
         self._playlist_msg = None
         self._songs = {"current": None, "next": []}
-        self._voice = {"channel": None, "client": None}
+        self._voice = {"channel": None, "client": None, "source": None}
 
     @property
     def playlist_msg(self):
@@ -44,8 +44,7 @@ class Player:
             return
         if self._playing:
             print('skip')
-
-            await self._check_queue()
+            self._voice['client'].stop()
 
     async def play(self, message, song):
         if self._voice["client"] is None:
@@ -68,13 +67,15 @@ class Player:
         self._songs["next"].append(song)
 
     async def _check_queue(self):
+        print("[DEBUG] _check_queue")
         if not self._songs["next"]:
             self._playing = False
             self._songs["current"] = None
             await self._leave()
             return
-        self._voice["client"].stop()
-        await self._play_song(self._get_song())
+        if not self._voice['client'] is None:
+            await self._play_song(self._get_song())
+        # asyncio.run_coroutine_threadsafe(self._play_song(self._get_song()), self._loop)
 
     def _get_song(self):
         return self._songs["next"].pop(0)
@@ -96,11 +97,10 @@ class Player:
         self._songs["current"] = song
 
         try:
-            self._voice["client"].play(
-                discord.PCMVolumeTransformer(
-                    discord.FFmpegPCMAudio(song.url, **self.FFMPEG_OPTIONS)
-                ),
-                after=lambda error: asyncio.run_coroutine_threadsafe(self._check_queue(), self._loop),
+            self._voice['source'] = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(song.url, **self.FFMPEG_OPTIONS))
+            self._voice['source'].volume = 0.1
+
+            self._voice["client"].play(self._voice['source'], after=lambda e: self._loop.create_task(self._check_queue()),
             )
             self.pause()
             await asyncio.sleep(1)
@@ -132,7 +132,7 @@ class Playlist(commands.Cog):
     async def on_ready(self):
         servers = self.db.select_all_music_channel()
         if servers:
-            for guild_id, channel_id in servers:
+            for _, channel_id in servers:
                 channel = self.bot.get_channel(channel_id)
                 await self._create_playlist(channel)
         print("[INFO] 음악봇 초기화 완료")
@@ -166,11 +166,20 @@ class Playlist(commands.Cog):
         else:
             link = message.content
 
-        await self.players[message.guild].play(
-            message=message, song=Youtube.extract_info(link=link)
-        )
+        if link:
+            await self.players[message.guild].play(
+                message=message, song=Youtube.extract_info(link=link)
+            )
 
         await message.delete()
+
+    @commands.command(name='test')
+    async def test(self, ctx):
+        rains = ['https://www.youtube.com/watch?v=a1vPy2TX-us','https://www.youtube.com/watch?v=a1vPy2TX-us','https://www.youtube.com/watch?v=a1vPy2TX-us','https://www.youtube.com/watch?v=a1vPy2TX-us']
+        for link in rains:
+            await self.players[ctx.message.guild].play(
+                    message=ctx.message, song=Youtube.extract_info(link=link)
+                    )
 
     @commands.command(name="초기화", help="이 채널을 음악봇이 사용합니다.")
     @commands.has_permissions(administrator=True)
@@ -224,7 +233,7 @@ class Playlist(commands.Cog):
             self.bot.music_channel_list.remove(channel)
         self.bot.music_channel_list.append(channel)
 
-        player = Player(loop=self.bot.loop, playlist_channel=channel)
+        player = Player(playlist_channel=channel)
         playlist_msg = await channel.send(embed=embed, components=components)
         player.set_playlist_msg(playlist_msg)
         self.players[channel.guild] = player
@@ -283,7 +292,7 @@ class Playlist(commands.Cog):
         except asyncio.exceptions.TimeoutError:
             await select_message.delete()
             await message.channel.send("노래 선택이 취소되었습니다.", delete_after=5)
-            return
+            return ''
 
         await select_message.delete()
 
