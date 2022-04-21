@@ -71,7 +71,8 @@ class Player:
             await self._add_song(song)
             if not self._same_voice_channel(message.author.voice.channel):
                 await message.channel.send(
-                    "노래를 추가했어요! 하지만 채널이 다르신 것 같아요.. 노래를 듣고싶다면 제가 있는 채널에 들어와주세요!"
+                    "노래를 추가했어요! 하지만 채널이 다르신 것 같아요.. 노래를 듣고싶다면 제가 있는 채널에 들어와주세요!",
+                    delete_after=5,
                 )
             return
 
