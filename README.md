@@ -92,9 +92,8 @@ Select number you want to play
 
 ### 2. Button Interaction
 
-button | button | button | button | button
+Pause | Resume | Skip | Shuffle | Help
 ---|:---:|:---:|:---:|---:
- Pause | Resume | Skip | Shuffle | Help
  First | Prev | Next | Last | Youtube
 
 ### 3. Music Queue
