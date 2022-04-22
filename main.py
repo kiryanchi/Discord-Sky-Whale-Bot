@@ -16,5 +16,5 @@ def main(env: str):
 
 
 if __name__ == "__main__":
-    env = sys.argv[1] if len(sys.argv) > 1 else "dev"
+    env = sys.argv[1] if len(sys.argv) > 1 else "prod"
     main(env)
