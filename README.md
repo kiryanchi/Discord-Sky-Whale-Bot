@@ -94,7 +94,7 @@ Select number you want to play
 
 Pause | Resume | Skip | Shuffle | Help
 ---|:---:|:---:|:---:|---:
- First | Prev | Next | Last | Youtube
+ **First** | **Prev** | **Next** | **Last** | **Youtube**
 
 ### 3. Music Queue
 
