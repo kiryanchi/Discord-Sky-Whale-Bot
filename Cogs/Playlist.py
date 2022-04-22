@@ -97,8 +97,8 @@ class Playlist(commands.Cog):
         print(f"[INFO] [{channel.guild.name}] 길드 [{channel.name}] 채널 음악 봇 초기화 완료")
 
     async def _select_youtube_link(self, message):
-        result = await Youtube.search(title=message.content)
-        embed, components = Embed.search(message.content, result)
+        search = await Youtube.search(message=message)
+        embed, components = Embed.search(message=message, search=search)
 
         # 유튜브 검색 후 9개 뽑아옴
 
@@ -109,7 +109,7 @@ class Playlist(commands.Cog):
                 "button_click",
                 check=(
                     lambda interaction: message.author == interaction.user
-                    and message.content in interaction.custom_id
+                    and str(message.id) in interaction.custom_id
                 ),
                 timeout=15,
             )
@@ -126,7 +126,7 @@ class Playlist(commands.Cog):
 
         await select_message.delete()
 
-        link = f"https://youtu.be/{result[select - 1]['id']}"
+        link = f"https://youtu.be/{search[select - 1]['id']}"
 
         return link
 

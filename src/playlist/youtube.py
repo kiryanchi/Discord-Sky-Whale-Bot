@@ -17,9 +17,9 @@ class Youtube:
         return Song(id=info["id"], title=info["title"], url=info["formats"][3]["url"])
 
     @classmethod
-    async def search(cls, title):
+    async def search(cls, message):
         result = await asyncio.get_event_loop().run_in_executor(
-            None, lambda: VideosSearch(title, limit=cls.NUM_OF_SEARCH)
+            None, lambda: VideosSearch(message.content, limit=cls.NUM_OF_SEARCH)
         )
 
         return result.result()["result"]
