@@ -11,6 +11,8 @@ SPACE = "\u17B5"
 
 
 class Embed:
+    INIT_MSG = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [1;35m향유[0m하기 시작했어요\n```"
+
     @staticmethod
     def wrap(text):
         def is_korean(char):

@@ -6,7 +6,7 @@ from src.playlist.youtube import Youtube
 from src.playlist.player import Player
 
 
-class Playlist(commands.Cog):
+class Playlist(commands.Cog, name="음악"):
     def __init__(self, bot):
         self.bot = bot
         self.db = bot.db
@@ -86,7 +86,7 @@ class Playlist(commands.Cog):
             self.bot.music_channel_list.remove(channel)
         self.bot.music_channel_list.append(channel)
 
-        playlist_msg = await channel.send(Player.INIT_MSG)
+        playlist_msg = await channel.send(Embed.INIT_MSG)
         player = Player(
             bot=self.bot, playlist_channel=channel, playlist_msg=playlist_msg
         )

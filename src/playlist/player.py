@@ -6,8 +6,6 @@ from src.playlist.embed import Embed
 
 
 class Player:
-    INIT_MSG = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [1;35m향유[0m하기 시작했어요\n```"
-
     def __init__(self, bot, playlist_channel, playlist_msg):
         self.FFMPEG_OPTIONS = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
