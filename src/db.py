@@ -5,12 +5,11 @@ import os
 class DB:
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "_instance"):
-            print("[INFO] DB 연결 됨")  # log
+            print(f"[INFO] {args[0]} DB 연결 됨")  # log
             cls._instance = super().__new__(cls)
         return cls._instance
 
     def __init__(self, db):
-        print(db)
         self.con = sqlite3.connect(db)
         self.cursor = self.con.cursor()
         if not os.path.isfile(db):

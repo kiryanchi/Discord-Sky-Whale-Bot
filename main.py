@@ -6,15 +6,13 @@ from src.whale import Whale
 
 
 def main(env: str):
-    TOKEN = open("token", "r").readline()
     with open("conf.json") as conf:
         config = json.load(conf)
     environment = config[env]
-    print(environment)
     intents = Intents.all()
     bot = Whale(command_prefix=".", intents=intents, environment=environment)
 
-    bot.run(TOKEN)
+    bot.run(environment["token"])
 
 
 if __name__ == "__main__":

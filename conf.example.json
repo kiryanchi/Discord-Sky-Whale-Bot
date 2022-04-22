@@ -1,0 +1,12 @@
+{
+	"dev": {
+		"token": "...",
+		"default_command_prefix": "...",
+		"db": "..."
+	},
+	"prod": {
+		"token": "...",
+		"default_command_prefix": "...",
+		"db": "..."
+	}
+}

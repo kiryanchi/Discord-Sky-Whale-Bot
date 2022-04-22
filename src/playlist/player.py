@@ -217,7 +217,9 @@ class Player:
             self._voice["client"].stop()
 
     async def _update_playlist(self):
-        self._page["max"] = len(self._songs["next"]) // 10
+        self._page["max"] = (
+            (len(self._songs["next"]) - 1) // 10 if len(self._songs["next"]) > 0 else 0
+        )
         if self._page["current"] > self._page["max"]:
             self._page["current"] = self._page["max"]
 
