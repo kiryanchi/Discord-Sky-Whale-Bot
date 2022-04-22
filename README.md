@@ -10,7 +10,7 @@ English is not my language.
 
 ## Library
 
-- [**discord.py**]([https://](https://github.com/Rapptz/discord.py)
+- [**discord.py**](https://github.com/Rapptz/discord.py)
 - [**youtube_dl**](https://github.com/ytdl-org/youtube-dl)
 - [**discord components**](https://github.com/kiki7000/discord.py-components)
 - [**youtube-search-python**](https://github.com/alexmercerind/youtube-search-python)
