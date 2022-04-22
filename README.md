@@ -64,7 +64,7 @@ $ python3 main.py dev
 (prefix)init # aliases 초기화, 시작, start
 ```
 
-### 5. Then Sky Whale will come to channel.
+### 5. Then Sky Whale will come to channel
 
 ![init image](https://cdn.discordapp.com/attachments/963347486720798770/966971459610226688/Screen_Shot_2022-04-22_at_4.59.04_PM.png)
 
@@ -92,7 +92,7 @@ Select number you want to play
 
 ### 2. Button Interaction
 
-Pause | Resume | Skip | Shuffle | Help
+Pause | Resume | Skip | Shuffle | <center> Help
 ---|:---:|:---:|:---:|---:
  **First** | **Prev** | **Next** | **Last** | **Youtube**
 
