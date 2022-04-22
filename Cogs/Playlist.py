@@ -57,7 +57,9 @@ class Playlist(commands.Cog, name="음악"):
 
         await message.delete()
 
-    @commands.command(name="초기화", help="이 채널을 음악봇이 사용합니다.")
+    @commands.command(
+        name="초기화", help="이 채널을 음악봇이 사용합니다.", aliases=["init", "start", "시작"]
+    )
     @commands.has_permissions(administrator=True)
     async def start(self, ctx):
         async def callback(interaction):
