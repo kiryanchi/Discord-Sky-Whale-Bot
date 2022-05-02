@@ -54,6 +54,9 @@ class Player:
         await self._last()
         await interaction.send("마지막 페이지", delete_after=0.1, ephemeral=False)
 
+    async def leave(self):
+        await self._leave()
+
     async def next(self, interaction):
         await self._next()
         await interaction.send("다음 페이지", delete_after=0.1, ephemeral=False)
@@ -149,7 +152,9 @@ class Player:
             await self._update_playlist()
 
     async def _leave(self):
-        self._voice["client"] = await self._voice["client"].disconnect()
+        if self._voice["client"]:
+            self._voice["client"] = await self._voice["client"].disconnect()
+        self._voice["client"] = None
         self._voice["channel"] = None
 
     async def _move(self, voice_channel):

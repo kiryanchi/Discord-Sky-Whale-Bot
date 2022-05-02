@@ -29,10 +29,6 @@ class Playlist(commands.Cog, name="음악"):
         if message.channel not in self.bot.music_channel_list:
             return
 
-        if message.content == f"{self.bot.command_prefix}초기화":
-            await self.bot.process_command(message)
-            return
-
         if message.content.startswith(self.bot.command_prefix):
             return
 
@@ -86,6 +82,10 @@ class Playlist(commands.Cog, name="음악"):
 
         if channel in self.bot.music_channel_list:
             self.bot.music_channel_list.remove(channel)
+
+        if channel.guild in self.players:
+            await self.players[channel.guild].leave()
+
         self.bot.music_channel_list.append(channel)
 
         playlist_msg = await channel.send(Embed.INIT_MSG)
