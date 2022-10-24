@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+youtube-dl = "*"
+rich = "*"
+youtube-search-python = "*"
+pynacl = "*"
+python-dotenv = "*"
+"discord.py" = {extras = ["voice"], version = "*"}
+
+[dev-packages]
+isort = "*"
+black = "*"
+
+[requires]
+python_version = "3.10"
+
+[scripts]
+"start:dev" = "bash -c 'ENV=dev python main.py'"
+"start:prod" = "bash -c 'ENV=prod python main.py'"
