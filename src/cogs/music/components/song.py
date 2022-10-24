@@ -7,5 +7,5 @@ class Song:
         self.thumbnail = info["thumbnail"]
         self.url = info["url"]
 
-    def __str__(self):
+    def __repr__(self):
         return self.title

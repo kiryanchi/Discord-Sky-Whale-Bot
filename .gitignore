@@ -1,0 +1,23 @@
+# dot files
+__pycache__/
+*.env
+.python-version
+.DS_Store
+.git
+.idea/
+
+# setting
+setting.py
+
+# Test folder
+test/
+
+# DB file
+*.db
+
+# nohup files
+nohup.out
+
+# log files
+log/
+*.log

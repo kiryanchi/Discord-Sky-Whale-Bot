@@ -1,14 +1,26 @@
+from __future__ import annotations
+
 import asyncio
 import random
+from typing import List, Optional, TYPE_CHECKING
 
-from discord import Message, PCMVolumeTransformer, FFmpegPCMAudio, Interaction, opus
+from discord import (
+    Message,
+    PCMVolumeTransformer,
+    FFmpegPCMAudio,
+    Interaction,
+    opus,
+    VoiceClient,
+    TextChannel,
+    Member,
+)
 
-from src.cogs.music.components.song import Song
-from src.cogs.music.view import Playlist
-from src.tools import set_logger
+from src.cogs.music.view import PlaylistEmbed, PlaylistView
+from src.tools import logger
 from src.whale import Whale
 
-log = set_logger()
+if TYPE_CHECKING:
+    from src.cogs.music.components import Song
 
 FFMPEG_OPTIONS = {
     "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
@@ -32,7 +44,7 @@ class Player:
     #     return self.current_song is None
 
     @property
-    def current_song(self) -> Song:
+    def current_song(self) -> Optional[Song]:
         return self._songs["current"]
 
     @current_song.setter
@@ -40,11 +52,11 @@ class Player:
         self._songs["current"] = value
 
     @property
-    def next_songs(self):
+    def next_songs(self) -> List[Optional[Song]]:
         return self._songs["next"]
 
     @property
-    def current_page(self):
+    def current_page(self) -> int:
         return self._page["current"]
 
     @current_page.setter
@@ -52,7 +64,7 @@ class Player:
         self._page["current"] = value
 
     @property
-    def max_page(self):
+    def max_page(self) -> int:
         return self._page["max"]
 
     @max_page.setter
@@ -71,6 +83,7 @@ class Player:
         self._voice["channel"] = None
 
     async def pause(self, interaction: Interaction = None):
+        self._voice["client"]: VoiceClient
         if self._voice["client"] and self._voice["client"].is_playing():
             self._voice["client"].pause()
         if interaction:
@@ -79,7 +92,7 @@ class Player:
             )
             await asyncio.sleep(1)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 일시정지"
             )
 
@@ -90,7 +103,7 @@ class Player:
             )
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 일시정지 해제"
             )
         if self._voice["client"] and self._voice["client"].is_paused():
@@ -103,12 +116,12 @@ class Player:
             )
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 스킵"
             )
 
         if self._voice["client"] is None:
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 스킵"
             )
 
@@ -119,7 +132,7 @@ class Player:
             )
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 셔플"
             )
         random.shuffle(self.next_songs)
@@ -132,7 +145,7 @@ class Player:
             )
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 help"
             )
         return  # TODO: Help Embed 만들기
@@ -142,7 +155,7 @@ class Player:
             await interaction.response.send_message(f"재생목록 첫 페이지")
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 first"
             )
         if self.current_page != 0:
@@ -154,7 +167,7 @@ class Player:
             await interaction.response.send_message(f"재생목록 이전 페이지")
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 prev"
             )
         if self.current_page > 0:
@@ -166,7 +179,7 @@ class Player:
             await interaction.response.send_message(f"재생목록 다음 페이지")
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 next"
             )
         if self.current_page < self.max_page:
@@ -178,7 +191,7 @@ class Player:
             await interaction.response.send_message(f"재생목록 마지막 페이지")
             await asyncio.sleep(3)
             await interaction.delete_original_response()
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 last"
             )
         if self.current_page != self.max_page:
@@ -190,32 +203,32 @@ class Player:
             await interaction.response.send_message(
                 f"현재 재생 중인 노래: {self.current_song.webpage_url}", ephemeral=True
             )
-            log.debug(
+            logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 youtube"
             )
 
-    async def play(self, message: Message, song: Song):
+    async def play(self, channel: TextChannel, song: Song, author: Member):
 
         # TODO: 이거 왠지 위차 바꾸면 최적화 가능할 것 같은데
         if self._voice["client"] is None:
-            await self.join(message.author.voice.channel)
+            await self.join(author.voice.channel)
 
         await self._add_song(song)
         if self.playing:
-            if not self._same_voice_channel(message.author.voice.channel):
-                await message.channel.send(
+            if not self._same_voice_channel(author.voice.channel):
+                await channel.send(
                     "노래를 추가했어요! 하지만 채널이 다르신 것 같아요.. 노래를 듣고싶다면 제가 있는 채널에 들어와주세요!",
                     delete_after=5,
                 )
             return
 
-        if not self._same_voice_channel(message.author.voice.channel):
-            await self._move(message.author.voice.channel)
+        if not self._same_voice_channel(author.voice.channel):
+            await self._move(author.voice.channel)
 
         await self._check_queue()
         # await self._play(song)
 
-    async def _add_song(self, song: Song):  # TODO: Embed
+    async def _add_song(self, song: Song):
         self.next_songs.append(song)
         await self.update_playlist()
 
@@ -223,19 +236,19 @@ class Player:
         self.playing = True
         await self.update_playlist()
 
-        log.info(f"길드: [{self.guild.id}/{self.guild.name}] :: {song.title} 재생")
+        logger.info(f"길드: [{self.guild.id}/{self.guild.name}] :: {song.title} 재생")
         try:
             self._voice["client"].play(
                 PCMVolumeTransformer(FFmpegPCMAudio(song.url, **FFMPEG_OPTIONS)),
                 after=self._check_queue,
                 # after=lambda e: self._loop.create_task(self._check_queue()),
             )
-            log.debug(f"길드: [{self.guild.id}/{self.guild.name}] :: 성공")
+            logger.debug(f"길드: [{self.guild.id}/{self.guild.name}] :: 성공")
             await self.pause()
             await asyncio.sleep(1)
             await self.resume()
         except opus.OpusNotLoaded:
-            log.debug(f"길드: [{self.guild.id}/{self.guild.name}] :: 실패")
+            logger.debug(f"길드: [{self.guild.id}/{self.guild.name}] :: 실패")
             await asyncio.sleep(10)
             await self._check_queue()
 
@@ -243,7 +256,7 @@ class Player:
         self._voice["channel"] = voice_channel
         self._voice["client"] = await self._voice["client"].move_to(voice_channel)
 
-    async def _check_queue(self):  # TODO: Embed
+    async def _check_queue(self):
         if not self.next_songs:
             self.playing = False
             self.current_song = None
@@ -262,8 +275,8 @@ class Player:
         if self.current_page > self.max_page:
             self.current_page = self.max_page
 
-        embed = Playlist.Embed(self)
-        view = Playlist.View(self)
+        embed = PlaylistEmbed(self)
+        view = PlaylistView(self)
 
         await self.playlist.edit(embed=embed, view=view)
 
