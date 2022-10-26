@@ -35,6 +35,7 @@ class Player:
         self.guild = playlist.guild
         self.channel = playlist.channel
         self.playing = False
+        self.loop = asyncio.get_running_loop()
         self._songs = {"current": None, "next": []}
         self._voice = {"channel": None, "client": None}
         self._page = {"current": 0, "max": 0}
@@ -240,8 +241,7 @@ class Player:
         try:
             self._voice["client"].play(
                 PCMVolumeTransformer(FFmpegPCMAudio(song.url, **FFMPEG_OPTIONS)),
-                after=self._check_queue,
-                # after=lambda e: self._loop.create_task(self._check_queue()),
+                after=lambda e: self.loop.create_task(self._check_queue()),
             )
             logger.debug(f"길드: [{self.guild.id}/{self.guild.name}] :: 성공")
             await self.pause()
