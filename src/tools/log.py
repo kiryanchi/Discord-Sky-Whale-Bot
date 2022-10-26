@@ -4,6 +4,8 @@ import sys
 
 from rich.logging import RichHandler
 
+from setting import DEBUG
+
 LOG_PATH = "./log.log"
 RICH_FORMAT = "[%(filename)s:%(lineno)s] >> %(message)s"
 FILE_HANDLER_FORMAT = "[%(asctime)s]\\t%(levelname)s\\t[%(filename)s:%(funcName)s:%(lineno)s]\\t>> %(message)s"
@@ -18,7 +20,9 @@ def set_logger() -> logging.Logger:
         )
 
     logging.basicConfig(
-        level="NOTSET", format=RICH_FORMAT, handlers=[RichHandler(rich_tracebacks=True)]
+        level="DEBUG" if DEBUG else "INFO",
+        format=RICH_FORMAT,
+        handlers=[RichHandler(rich_tracebacks=True)],
     )
     logger = logging.getLogger("rich")
     sys.excepthook = handle_exception
@@ -27,3 +31,6 @@ def set_logger() -> logging.Logger:
     # logger.addHandler(file_handler)
 
     return logger
+
+
+logger = set_logger()

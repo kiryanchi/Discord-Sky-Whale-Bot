@@ -10,6 +10,7 @@ youtube-search-python = "*"
 pynacl = "*"
 python-dotenv = "*"
 "discord.py" = {extras = ["voice"], version = "*"}
+sqlalchemy = "*"
 
 [dev-packages]
 isort = "*"
@@ -19,5 +20,6 @@ black = "*"
 python_version = "3.10"
 
 [scripts]
-"start:dev" = "bash -c 'ENV=dev python main.py'"
-"start:prod" = "bash -c 'ENV=prod python main.py'"
+# "start:dev" = "bash -c 'ENV=dev python main.py'"
+# "start:prod" = "bash -c 'ENV=prod python main.py'"
+"start" = "python main.py"

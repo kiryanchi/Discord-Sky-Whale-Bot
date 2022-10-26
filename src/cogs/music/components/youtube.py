@@ -4,7 +4,7 @@ from youtube_dl import YoutubeDL
 from youtubesearchpython.__future__ import VideosSearch
 
 from setting import NUM_OF_SEARCH
-from src.cogs.music.components.song import Song
+from src.cogs.music.components import Song
 
 YDL_OPTS = {
     "format": "bestaudio/best",
@@ -16,7 +16,7 @@ YDL_OPTS = {
 
 async def youtube_search(song_title):
     result = (await VideosSearch(song_title, limit=NUM_OF_SEARCH).next())["result"]
-    return result
+    return result[:NUM_OF_SEARCH]
 
 
 async def link_to_song(link):
