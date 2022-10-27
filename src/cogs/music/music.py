@@ -47,7 +47,10 @@ class Music(commands.GroupCog, name="노래"):
         if message.author.bot:
             return
 
-        if message.channel != self.bot.players[message.guild.id].channel:
+        if (not message.guild.id in self.bot.players) or (  # 음악봇이 초기화 되지 않았거나
+            message.channel
+            != self.bot.players[message.guild.id].channel  # 음악 채널이 아닌 경우
+        ):
             return
 
         if message.content.startswith(DEFAULT_PREFIX):

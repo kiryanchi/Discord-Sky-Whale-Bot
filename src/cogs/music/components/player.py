@@ -9,7 +9,6 @@ from discord import (
     PCMVolumeTransformer,
     FFmpegPCMAudio,
     Interaction,
-    opus,
     VoiceClient,
     TextChannel,
     Member,
@@ -39,10 +38,6 @@ class Player:
         self._songs = {"current": None, "next": []}
         self._voice = {"channel": None, "client": None}
         self._page = {"current": 0, "max": 0}
-
-    # @property
-    # def playing(self) -> bool:
-    #     return self.current_song is None
 
     @property
     def current_song(self) -> Optional[Song]:
@@ -121,10 +116,8 @@ class Player:
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 스킵"
             )
 
-        if self._voice["client"] is None:
-            logger.debug(
-                f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 스킵"
-            )
+        if self.playing:
+            self._voice["client"].stop()
 
     async def shuffle(self, interaction: Interaction = None):
         if interaction:
@@ -238,19 +231,13 @@ class Player:
         await self.update_playlist()
 
         logger.info(f"길드: [{self.guild.id}/{self.guild.name}] :: {song.title} 재생")
-        try:
-            self._voice["client"].play(
-                PCMVolumeTransformer(FFmpegPCMAudio(song.url, **FFMPEG_OPTIONS)),
-                after=lambda e: self.loop.create_task(self._check_queue()),
-            )
-            logger.debug(f"길드: [{self.guild.id}/{self.guild.name}] :: 성공")
-            await self.pause()
-            await asyncio.sleep(1)
-            await self.resume()
-        except opus.OpusNotLoaded:
-            logger.debug(f"길드: [{self.guild.id}/{self.guild.name}] :: 실패")
-            await asyncio.sleep(10)
-            await self._check_queue()
+        self._voice["client"].play(
+            PCMVolumeTransformer(FFmpegPCMAudio(song.url, **FFMPEG_OPTIONS)),
+            after=lambda e: self.loop.create_task(self._check_queue()),
+        )
+        await self.pause()
+        await asyncio.sleep(1)
+        await self.resume()
 
     async def _move(self, voice_channel):
         self._voice["channel"] = voice_channel

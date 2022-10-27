@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import glob
 from itertools import cycle
 from typing import Dict
 from typing import TYPE_CHECKING
 
-from discord import Game, Intents, Object, Guild
+from discord import Game, Intents, Object, Guild, opus
 from discord.ext import commands, tasks
 
 from setting import COMMANDS, DEBUG, DEFAULT_PREFIX, ADMIN_GUILD_ID
@@ -26,6 +27,14 @@ class Whale(commands.Bot):
         super().__init__(intents=Intents.all(), command_prefix=DEFAULT_PREFIX)
 
     async def setup_hook(self) -> None:
+
+        logger.info("opus 로드 확인")
+        if not opus.is_loaded():
+            logger.debug("opus 확인 불가. 다시 불러옵니다.")
+            _opus = glob.glob("/opt/homebrew/Cellar/opus/*/lib/libopus.0.dylib")
+            opus.load_opus(_opus[0])
+        logger.info("opus 로드 완료")
+
         logger.info(f"명령어 로드 시작")
         for command in COMMANDS:
             await self.load_extension(f"src.cogs.{command}.{command}")
