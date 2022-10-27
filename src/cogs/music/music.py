@@ -87,7 +87,7 @@ class Music(commands.GroupCog, name="노래"):
 
     @app_commands.command(name="초기화", description="음악봇이 이상할 때, 새로 초기화합니다.")
     async def reset_music_channel_command(self, interaction: Interaction):
-        if self.is_init_music_channel(interaction):
+        if self.is_not_init_music_channel(interaction):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
@@ -96,7 +96,7 @@ class Music(commands.GroupCog, name="노래"):
     @app_commands.command(name="재생", description="노래를 재생합니다.")
     @app_commands.rename(title="제목or링크")
     async def add_song_to_player_command(self, interaction: Interaction, title: str):
-        if self.is_init_music_channel(interaction):
+        if self.is_not_init_music_channel(interaction):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
@@ -111,7 +111,7 @@ class Music(commands.GroupCog, name="노래"):
 
     @app_commands.command(name="일시정지", description="음악 재생을 잠깐 중단합니다.")
     async def pause_command(self, interaction: Interaction):
-        if self.is_init_music_channel(interaction):
+        if self.is_not_init_music_channel(interaction):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
@@ -119,7 +119,7 @@ class Music(commands.GroupCog, name="노래"):
 
     @app_commands.command(name="정지해제", description="일시정지를 해제합니다.")
     async def resume_command(self, interaction: Interaction):
-        if self.is_init_music_channel(interaction):
+        if self.is_not_init_music_channel(interaction):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
@@ -127,7 +127,7 @@ class Music(commands.GroupCog, name="노래"):
 
     @app_commands.command(name="셔플", description="재생목록을 한 번 섞습니다.")
     async def shuffle_command(self, interaction: Interaction):
-        if self.is_init_music_channel(interaction):
+        if self.is_not_init_music_channel(interaction):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
@@ -135,7 +135,7 @@ class Music(commands.GroupCog, name="노래"):
 
     @app_commands.command(name="스킵", description="노래를 스킵합니다.")
     async def skip_song_command(self, interaction: Interaction):
-        if self.is_init_music_channel(interaction):
+        if self.is_not_init_music_channel(interaction):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
@@ -143,7 +143,7 @@ class Music(commands.GroupCog, name="노래"):
 
     @app_commands.command(name="현재", description="현재 재생중인 노래 정보를 가져옵니다.")
     async def current_song_command(self, interaction: Interaction):
-        if self.is_init_music_channel(interaction):
+        if self.is_not_init_music_channel(interaction):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
@@ -152,8 +152,8 @@ class Music(commands.GroupCog, name="노래"):
             await interaction.response.send_message(content=f"{song}", ephemeral=True)
             await self.bot.players[interaction.guild_id].youtube(interaction)
 
-    async def is_init_music_channel(self, interaction: Interaction):
-        return interaction.guild_id in self.bot.players
+    def is_not_init_music_channel(self, interaction: Interaction):
+        return not (interaction.guild_id in self.bot.players)
 
     async def initialize(self, guild: Guild, channel: TextChannel):
         if guild in self.bot.players:
