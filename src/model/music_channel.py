@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer
 from sqlalchemy.orm import Session
 
 from src.db import Base, engine
+from src.tools import logger
 
 
 class MusicChannel(Base):
@@ -16,6 +17,7 @@ class MusicChannel(Base):
 
     @staticmethod
     def add(music_channel: MusicChannel):
+        logger.info(f"{MusicChannel.__tablename__}: {music_channel} DB에 추가")
         session: Session
         with Session(engine) as session:
             session.add(music_channel)
@@ -23,6 +25,7 @@ class MusicChannel(Base):
 
     @staticmethod
     def delete(guild_id: int):
+        logger.info(f"{MusicChannel.__tablename__}: {guild_id} 길드 DB에서 삭제")
         session: Session
         with Session(engine) as session:
             music_channel = session.get(MusicChannel, guild_id)
@@ -31,6 +34,9 @@ class MusicChannel(Base):
 
     @staticmethod
     def update(guild_id: int, channel_id: int):
+        logger.info(
+            f"{MusicChannel.__tablename__}: {guild_id} 길드 음악 채널을 {channel_id}로 변경"
+        )
         session: Session
         with Session(engine) as session:
             music_channel = MusicChannel.get(guild_id)

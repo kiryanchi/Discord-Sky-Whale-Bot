@@ -14,7 +14,7 @@ from discord import (
     Member,
 )
 
-from src.cogs.music.view import PlaylistEmbed, PlaylistView
+from src.cogs.music.view import PlaylistEmbed, PlaylistView, HelpEmbed
 from src.tools import logger
 from src.whale import Whale
 
@@ -134,15 +134,13 @@ class Player:
 
     async def help(self, interaction: Interaction = None):
         if interaction:
-            await interaction.response.send_message(
-                f"{interaction.user.name}님이 사용법을 클릭했습니다."
-            )
-            await asyncio.sleep(3)
-            await interaction.delete_original_response()
+            await interaction.response.defer(thinking=True, ephemeral=True)
             logger.debug(
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 help"
             )
-        return  # TODO: Help Embed 만들기
+        help_embed = HelpEmbed()
+        await interaction.channel.send(embed=help_embed, ephemeral=True)
+        return await interaction.delete_original_response()
 
     async def first(self, interaction: Interaction = None):
         if interaction:
