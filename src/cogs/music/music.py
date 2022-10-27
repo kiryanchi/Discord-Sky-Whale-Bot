@@ -109,6 +109,30 @@ class Music(commands.GroupCog, name="노래"):
         )
         return
 
+    @app_commands.command(name="일시정지", description="음악 재생을 잠깐 중단합니다.")
+    async def pause_command(self, interaction: Interaction):
+        if self.is_init_music_channel(interaction):
+            return await interaction.response.send_message(
+                "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
+            )
+        await self.bot.players[interaction.guild_id].pause(interaction)
+
+    @app_commands.command(name="정지해제", description="일시정지를 해제합니다.")
+    async def resume_command(self, interaction: Interaction):
+        if self.is_init_music_channel(interaction):
+            return await interaction.response.send_message(
+                "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
+            )
+        await self.bot.players[interaction.guild_id].resume(interaction)
+
+    @app_commands.command(name="셔플", description="재생목록을 한 번 섞습니다.")
+    async def shuffle_command(self, interaction: Interaction):
+        if self.is_init_music_channel(interaction):
+            return await interaction.response.send_message(
+                "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
+            )
+        await self.bot.players[interaction.guild_id].shuffle(interaction)
+
     @app_commands.command(name="스킵", description="노래를 스킵합니다.")
     async def skip_song_command(self, interaction: Interaction):
         if self.is_init_music_channel(interaction):
