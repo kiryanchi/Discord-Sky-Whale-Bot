@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import glob
+import platform
 from itertools import cycle
 from typing import Dict
 from typing import TYPE_CHECKING
@@ -29,7 +30,7 @@ class Whale(commands.Bot):
     async def setup_hook(self) -> None:
 
         logger.info("opus 로드 확인")
-        if not opus.is_loaded():
+        if platform.system() == "Darwin":
             logger.debug("opus 확인 불가. 다시 불러옵니다.")
             _opus = glob.glob("/opt/homebrew/Cellar/opus/*/lib/libopus.0.dylib")
             opus.load_opus(_opus[0])
