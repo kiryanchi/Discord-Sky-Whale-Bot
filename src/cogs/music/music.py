@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import asyncio
+from asyncio import sleep
 from typing import TYPE_CHECKING
 
 from discord import (
@@ -66,7 +66,7 @@ class Music(commands.GroupCog, name="노래"):
     async def make_music_channel_command(self, interaction: Interaction):
         if not interaction.user.guild_permissions.manage_guild:
             await interaction.response.send_message("서버 관리 권한이 필요해요.")
-            await asyncio.sleep(5)
+            await sleep(5)
             return await interaction.delete_original_response()
 
         await interaction.response.defer(thinking=True)
@@ -91,7 +91,11 @@ class Music(commands.GroupCog, name="노래"):
             return await interaction.response.send_message(
                 "`시작` 명령어로 음악 채널을 먼저 설정해주세요."
             )
-        await self.initialize(interaction.guild, interaction.channel)
+        channel = self.bot.players[interaction.guild_id].channel
+        await self.initialize(interaction.guild, channel)
+        await interaction.response.send_message("음악채널을 초기화했습니다.")
+        await sleep(3)
+        await interaction.delete_original_response()
 
     @app_commands.command(name="재생", description="노래를 재생합니다.")
     @app_commands.rename(title="제목or링크")

@@ -139,8 +139,7 @@ class Player:
                 f"길드: [{interaction.guild_id}/{interaction.guild.name}] :: {interaction.user.name} 봇 help"
             )
         help_embed = HelpEmbed()
-        await interaction.channel.send(embed=help_embed, ephemeral=True)
-        return await interaction.delete_original_response()
+        await interaction.edit_original_response(embed=help_embed)
 
     async def first(self, interaction: Interaction = None):
         if interaction:
