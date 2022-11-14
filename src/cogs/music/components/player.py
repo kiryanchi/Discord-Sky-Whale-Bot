@@ -248,7 +248,7 @@ class Player:
             await self.leave()
             return
 
-        self.current_song = self.next_songs.pop()
+        self.current_song = self.next_songs.pop(0)
         await self._play(self.current_song)
 
     async def update_playlist(self):
