@@ -13,7 +13,7 @@ from discord import (
 )
 from discord.ext import commands
 from discord.ext.commands import CommandInvokeError
-from youtube_dl.utils import ExtractorError, DownloadError
+from yt_dlp.utils import ExtractorError, DownloadError
 
 from setting import DEFAULT_PREFIX
 from src.cogs.music.components import Player, youtube_search, link_to_song

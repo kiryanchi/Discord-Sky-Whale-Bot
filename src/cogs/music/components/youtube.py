@@ -1,7 +1,8 @@
+from youtubesearchpython.__future__ import VideosSearch
+
 import asyncio
 
-from youtube_dl import YoutubeDL
-from youtubesearchpython.__future__ import VideosSearch
+from yt_dlp import YoutubeDL
 
 from setting import NUM_OF_SEARCH
 from src.cogs.music.components import Song
