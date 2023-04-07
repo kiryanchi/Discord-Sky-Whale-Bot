@@ -16,7 +16,7 @@ from discord import (
 
 from src.cogs.music.view import PlaylistEmbed, PlaylistView, HelpEmbed
 from src.tools import logger
-from src.whale import Whale
+from src.extended_bot import ExtendedBot
 
 if TYPE_CHECKING:
     from src.cogs.music.components import Song
@@ -28,7 +28,7 @@ FFMPEG_OPTIONS = {
 
 
 class Player:
-    def __init__(self, bot: Whale, playlist: Message):
+    def __init__(self, bot: ExtendedBot, playlist: Message):
         self.bot = bot
         self.playlist = playlist
         self.guild = playlist.guild

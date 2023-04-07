@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import glob
 import platform
+import random
 from itertools import cycle
 from typing import Dict
 from typing import TYPE_CHECKING
 
-from discord import Game, Intents, Object, Guild, opus
+from discord import Game, Intents, Object, Guild, opus, ActivityType, Activity
 from discord.ext import commands, tasks
 
 from setting import COMMANDS, DEBUG, DEFAULT_PREFIX, ADMIN_GUILD_ID
@@ -16,12 +17,22 @@ from src.tools import logger
 if TYPE_CHECKING:
     from src.cogs.music.components import Player
 
-GAME_LIST = cycle(["향유", "유튜브 검색", "넷플릭스"])
+ACTIVITIES = [
+    # 듣는 중
+    ("노래", ActivityType.listening),
+    # 하는 중
+    ("향유", ActivityType.playing),
+    ("게임", ActivityType.playing),
+    ("유튜브 검색", ActivityType.playing),
+    # 시청 중
+    ("넷플릭스", ActivityType.watching),
+    ("유튜브", ActivityType.watching),
+]
 
 ADMIN_GUILD = Object(id=ADMIN_GUILD_ID)
 
 
-class Whale(commands.Bot):
+class ExtendedBot(commands.Bot):
     players: Dict[int, Player] = {}
 
     def __init__(self):
@@ -58,12 +69,13 @@ class Whale(commands.Bot):
         logger.info(f"{self.user} 로그인 성공")
 
         @tasks.loop(minutes=30)
-        async def change_game():
-            current_game = next(GAME_LIST)
-            await self.change_presence(activity=Game(current_game))
-            # log.info(f"{current_game} 하는 중")
+        async def change_activity():
+            _name, _type = random.choice(ACTIVITIES)
+            await self.change_presence(
+                activity=Activity(name=_name, type=_type)
+            )
 
-        change_game.start()
+        change_activity.start()
 
     async def on_guild_remove(self, guild: Guild):
         # TODO: 길드 나가면 데이터베이스에서 삭제

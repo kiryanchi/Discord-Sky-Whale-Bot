@@ -7,7 +7,7 @@ from discord import ui, TextStyle, Interaction
 from setting import FEEDBACK_CHANNEL_ID
 
 if TYPE_CHECKING:
-    from src.whale import Whale
+    from src.extended_bot import ExtendedBot
 
 
 class SuggestionModal(ui.Modal, title="건의하기"):
@@ -21,7 +21,7 @@ class SuggestionModal(ui.Modal, title="건의하기"):
         max_length=400,
     )
 
-    def __init__(self, bot: Whale):
+    def __init__(self, bot: ExtendedBot):
         super().__init__()
         self.feedback_channel = bot.get_channel(FEEDBACK_CHANNEL_ID)
 

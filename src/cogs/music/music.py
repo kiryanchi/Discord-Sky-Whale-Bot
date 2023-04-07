@@ -22,13 +22,13 @@ from src.model.music_channel import MusicChannel
 from src.tools import logger
 
 if TYPE_CHECKING:
-    from src.whale import Whale
+    from src.extended_bot import ExtendedBot
 
 INIT_MSG = "```ansi\n[1;36m하늘 고래[0m가[1;34m 하늘[0m을 [1;35m향유[0m하기 시작했어요\n```"
 
 
 class Music(commands.GroupCog, name="노래"):
-    def __init__(self, bot: Whale) -> None:
+    def __init__(self, bot: ExtendedBot) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
@@ -208,5 +208,5 @@ class Music(commands.GroupCog, name="노래"):
         await self.bot.players[channel.guild.id].play(channel, song, author)
 
 
-async def setup(bot: Whale) -> None:
+async def setup(bot: ExtendedBot) -> None:
     await bot.add_cog(Music(bot))

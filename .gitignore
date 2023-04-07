@@ -5,6 +5,7 @@ __pycache__/
 .DS_Store
 .git
 .idea/
+.DS_Store
 
 # Setting file
 setting.py
