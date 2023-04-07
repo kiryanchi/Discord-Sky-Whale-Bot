@@ -75,5 +75,7 @@ class ExtendedBot(commands.Bot):
         change_activity.start()
 
     async def on_guild_remove(self, guild: Guild):
-        # TODO: 길드 나가면 데이터베이스에서 삭제
-        return
+        if self.players.pop(guild.id, None) is None:
+            return logger.info(f"[{guild.id} | {guild}] DB에 등록되지 않은 길드입니다.")
+        MusicChannel.delete(guild.id)
+        logger.info(f"[{guild.id} | {guild}] 음악 채널 삭제")
