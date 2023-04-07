@@ -31,6 +31,12 @@ ACTIVITIES = [
 ADMIN_GUILD = Object(id=ADMIN_GUILD_ID)
 
 
+async def load_darwin_opus():
+    if platform.system() == "Darwin":
+        logger.debug("macOS 확인. opus 다시 불러옵니다.")
+        opus.load_opus(glob.glob("/opt/homebrew/Cellar/opus/*/lib/libopus.0.dylib")[0])
+
+
 class ExtendedBot(commands.Bot):
     players: Dict[int, Player] = {}
 
@@ -39,43 +45,46 @@ class ExtendedBot(commands.Bot):
 
     async def setup_hook(self) -> None:
 
-        logger.info("opus 로드 확인")
-        if platform.system() == "Darwin":
-            logger.debug("opus 확인 불가. 다시 불러옵니다.")
-            _opus = glob.glob("/opt/homebrew/Cellar/opus/*/lib/libopus.0.dylib")
-            opus.load_opus(_opus[0])
-        logger.info("opus 로드 완료")
+        await load_darwin_opus()
+        logger.info("opus 로드")
 
-        logger.info(f"명령어 로드 시작")
-        for command in COMMANDS:
-            await self.load_extension(f"src.cogs.{command}.{command}")
-            logger.info(f"명령어 [ {command:^10} ] 로드")
-        logger.info(f"명령어 로드 완료")
+        await self.load_cogs()
+        logger.info(f"명령어 로드")
 
-        if DEBUG:
-            self.tree.copy_global_to(guild=ADMIN_GUILD)
-        await self.tree.sync(guild=ADMIN_GUILD if DEBUG else None)
+        await self.sync_command()
         logger.info(f"{'길드' if DEBUG else '서버'} 명령어 등록 완료")
 
     async def on_ready(self):
-        logger.info("DB에서 확인되지 않은 길드 삭제하는 중")
-        for music_channel in MusicChannel.get_all():
-            if self.get_guild(music_channel.guild_id) is None:
-                MusicChannel.delete(music_channel.guild_id)
-                logger.debug(f"{music_channel} 삭제됨")
-        logger.info("DB 정리 완료")
-
-        logger.info(f"{self.user} 로그인 성공")
-
         @tasks.loop(minutes=30)
         async def change_activity():
             _name, _type = random.choice(ACTIVITIES)
             await self.change_presence(activity=Activity(name=_name, type=_type))
+            logger.debug(f"상태 변경: {_name} {_type}")
+
+        await self.delete_unchecked_guilds()
+        logger.info("DB 정리 완료")
 
         change_activity.start()
+        logger.info(f"{self.user} 로그인 성공")
 
     async def on_guild_remove(self, guild: Guild):
         if self.players.pop(guild.id, None) is None:
             return logger.info(f"[{guild.id} | {guild}] DB에 등록되지 않은 길드입니다.")
         MusicChannel.delete(guild.id)
         logger.info(f"[{guild.id} | {guild}] 음악 채널 삭제")
+
+    async def sync_command(self):
+        if DEBUG:
+            self.tree.copy_global_to(guild=ADMIN_GUILD)
+        await self.tree.sync(guild=ADMIN_GUILD if DEBUG else None)
+
+    async def load_cogs(self):
+        for command in COMMANDS:
+            await self.load_extension(f"src.cogs.{command}.{command}")
+            logger.debug(f"명령어 [ {command:^10} ] 로드")
+
+    async def delete_unchecked_guilds(self):
+        for music_channel in MusicChannel.get_all():
+            if self.get_guild(music_channel.guild_id) is None:
+                MusicChannel.delete(music_channel.guild_id)
+                logger.debug(f"{music_channel} 삭제됨")
