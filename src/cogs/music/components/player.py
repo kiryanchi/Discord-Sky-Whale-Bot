@@ -15,8 +15,8 @@ from discord import (
 )
 
 from src.cogs.music.view import PlaylistEmbed, PlaylistView, HelpEmbed
-from src.tools import logger
 from src.extended_bot import ExtendedBot
+from src.tools import logger
 
 if TYPE_CHECKING:
     from src.cogs.music.components import Song

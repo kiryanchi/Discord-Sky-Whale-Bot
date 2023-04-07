@@ -3,11 +3,10 @@ from __future__ import annotations
 import glob
 import platform
 import random
-from itertools import cycle
 from typing import Dict
 from typing import TYPE_CHECKING
 
-from discord import Game, Intents, Object, Guild, opus, ActivityType, Activity
+from discord import Intents, Object, Guild, opus, ActivityType, Activity
 from discord.ext import commands, tasks
 
 from setting import COMMANDS, DEBUG, DEFAULT_PREFIX, ADMIN_GUILD_ID
@@ -71,9 +70,7 @@ class ExtendedBot(commands.Bot):
         @tasks.loop(minutes=30)
         async def change_activity():
             _name, _type = random.choice(ACTIVITIES)
-            await self.change_presence(
-                activity=Activity(name=_name, type=_type)
-            )
+            await self.change_presence(activity=Activity(name=_name, type=_type))
 
         change_activity.start()
 

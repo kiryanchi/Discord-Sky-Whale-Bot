@@ -1,7 +1,6 @@
-from youtubesearchpython.__future__ import VideosSearch
-
 import asyncio
 
+from youtubesearchpython.__future__ import VideosSearch
 from yt_dlp import YoutubeDL
 
 from setting import NUM_OF_SEARCH
