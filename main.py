@@ -1,10 +1,13 @@
-from setting import DEBUG, TOKEN
-from src.tools import logger
+import asyncio
+import logging
+
+import discord.utils
+
+from setting import TOKEN
 from src.extended_bot import ExtendedBot
 
+extended_bot = ExtendedBot()
 
 if __name__ == "__main__":
-    if DEBUG:
-        logger.debug("DEBUG 모드 설정")
-    whale = ExtendedBot()
-    whale.run(TOKEN)
+    discord.utils.setup_logging(level=logging.WARNING, root=False)
+    asyncio.run(extended_bot.start(TOKEN))

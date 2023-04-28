@@ -3,8 +3,8 @@ from __future__ import annotations
 from sqlalchemy import Column, Integer
 from sqlalchemy.orm import Session
 
-from src.db import Base, engine
-from src.tools import logger
+from src.db.db import Base, engine
+from src.util.log import logger
 
 
 class MusicChannel(Base):

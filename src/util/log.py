@@ -32,6 +32,7 @@ def set_logger() -> logging.Logger:
 
     # file_handler = logging.FileHandler(LOG_PATH, mode="a", encoding="utf-8")
     file_handler = TimedRotatingFileHandler(LOG_PATH, when="midnight", interval=1)
+    file_handler.setLevel("DEBUG")
     file_handler.suffix = "%Y%m%d"
     file_handler.setFormatter(logging.Formatter(FILE_HANDLER_FORMAT))
     logger.addHandler(file_handler)
