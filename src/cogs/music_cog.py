@@ -35,7 +35,7 @@ class MusicCog(commands.GroupCog, name="고래"):
         if music := self.bot.musics.get(before.channel.guild.id, None):
             if (
                 self.bot.user in before.channel.members
-                and len(before.channel.members) == 1
+                and len([user for user in before.channel.members if not user.bot]) == 0
             ):
                 await music.reset()
                 logger.info(f"{get_info(before.channel.guild)} 다 나가서 음악 봇 초기화")

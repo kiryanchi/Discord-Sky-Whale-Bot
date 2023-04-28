@@ -52,10 +52,14 @@ class Player:
 
             logger.info(f"{get_info(self.guild)} 노래 [{song.title}] 재생")
             self.client.play(
-                # FFmpegPCMAudio(source=song.source, **FFMPEG_OPTS),
                 await FFmpegOpusAudio.from_probe(source=song.source, **FFMPEG_OPTS),
                 after=self.play_next,
             )
+
+            # 초반 렉 제거
+            self.client.pause()
+            await asyncio.sleep(0.3)
+            self.client.resume()
 
             await self.next.wait()
 
