@@ -36,7 +36,7 @@ class Player:
         while True:
             self.next.clear()
 
-            if len(self.channel.members) == 1:
+            if len([mem for mem in self.channel.members if not mem.bot]) == 0:
                 logger.debug(f"{get_info(self.guild)} 채널에 혼자 있어서 음악 봇 초기화")
                 self.bot.loop.create_task(self.stop())
                 return
@@ -49,6 +49,12 @@ class Player:
                     logger.debug(f"{get_info(self.guild)} 노래 재생 안 해서 음악 봇 초기화")
                     self.bot.loop.create_task(self.stop())
                     return
+
+            if self.channel != song.user.voice.channel:
+                logger.info(
+                    f"{get_info(self.guild)} {self.channel.name} -> {song.user.voice.channel} 채널 이동"
+                )
+                await self.client.move_to(song.user.voice.channel)
 
             logger.info(f"{get_info(self.guild)} 노래 [{song.title}] 재생")
             self.client.play(
