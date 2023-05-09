@@ -45,11 +45,24 @@ class Embed(Embed):
         )
         self.set_thumbnail(url=DEFAULT_IMG)
 
+        nums_emoji = {
+            1: ":one:",
+            2: ":two:",
+            3: ":three:",
+            4: ":four:",
+            5: ":five:",
+            6: ":six:",
+            7: ":seven:",
+            8: ":eight:",
+            9: ":nine:",
+            10: ":keycap_ten:",
+        }
+
         for i in range(len(searches)):
             search = searches[i]
             self.add_field(
-                name=f"{i + 1:2d}번\t({search['duration']}) {search['channel']['name']}",
-                value=f"제목: {search['title']}",
+                name=f"{nums_emoji[i+1]}\t({search['duration']}) {search['channel']['name']}",
+                value=f"{search['title']}",
                 inline=False,
             )
 
