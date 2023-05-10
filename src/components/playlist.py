@@ -112,7 +112,9 @@ class Embed(Embed):
 
         super().__init__(title=f" 🐳{self.space}Sky Whale{self.space} 🐳", color=COLOR)
         self.set_image(url=self.current_image).add_field(
-            name="현재 재생중인 노래", value=self.current_song_message, inline=False
+            name=f"🎵 현재 재생중인 노래",
+            value=self.current_song_message,
+            inline=False,
         ).set_author(
             name="하늘 고래를 서버로 불러보세요!",
             url="https://discord.com/api/oauth2/authorize?client_id=965786057897541682&permissions=8&scope=bot%20applications.commands",
@@ -122,26 +124,28 @@ class Embed(Embed):
 
         if self.playlist.current_song:
             self.add_field(
-                name="채널",
+                name=f"📌 채널",
                 value=f"[{self.playlist.current_song.uploader['name']}]({self.playlist.current_song.uploader['link']})",
                 inline=False,
             ).add_field(
-                name="재생시간",
+                name=f"⏳ 재생시간",
                 value=f"{self.playlist.current_song.duration}",
                 inline=True,
             ).add_field(
-                name="조회수",
+                name=f"👨‍👩‍👧‍👦 조회수",
                 value=f"{self.playlist.current_song.view_count}",
                 inline=True,
             ).add_field(
-                name="이거 누가 넣음?",
+                name="🤷‍♀️ 이거 누가 넣음?",
                 value=f"<@{self.playlist.current_song.user.id}>",
                 inline=True,
             )
 
         self.add_field(
-            name="대기중인 노래", value=self.next_songs_message, inline=False
-        ).set_footer(text="사용법은 도움말 버튼을 눌러보세요")
+            name=f"📚{self.space}대기중인 노래", value=self.next_songs_message, inline=False
+        ).set_footer(
+            text=f"현재 페이지 {self.playlist.current_page + 1} / {self.playlist.max_page + 1}"
+        )
 
     @property
     def current_image(self):
@@ -168,7 +172,9 @@ class Embed(Embed):
             for i in range(
                 10 * self.playlist.current_page, 10 * (self.playlist.current_page + 1)
             ):
-                song_list.append(self.playlist.next_songs._queue[i].title)
+                song_list.append(
+                    f"[{self.wrap(self.playlist.next_songs._queue[i].title)}]({self.playlist.next_songs._queue[i].link})"
+                )
         except IndexError:
             empty_song_list = ["예약된 노래가 없습니다." for _ in range(10 - len(song_list))]
             song_list = [*song_list, *empty_song_list]
@@ -176,10 +182,7 @@ class Embed(Embed):
         msg = ""
 
         for i in range(len(song_list)):
-            tmp = self.wrap(text=song_list[i])
-            msg += f"> [{self.playlist.current_page * 10 + i + 1}] {tmp}\n"
-
-        msg += f"> {self.space} \n> {self.space} 현재 페이지 {self.playlist.current_page + 1} / {self.playlist.max_page + 1}"
+            msg += f"[{self.playlist.current_page * 10 + i + 1}] {song_list[i]}\n"
 
         return msg
 
