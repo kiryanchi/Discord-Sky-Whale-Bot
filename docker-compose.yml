@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+    sky_whale:
+        container_name: sky_whale
+        build:
+            context: ./
+            dockerfile: Dockerfile
+
+networks:
+    lavalink: # create a lavalink network you can add other containers to, to give them access to Lavalink
+        name: lavalink

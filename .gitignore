@@ -430,6 +430,8 @@ $RECYCLE.BIN/
 
 # Setting
 setting.py
+# lavalink
+application.yml
 
 # Log
 *log*/

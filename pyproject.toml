@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "Discord-Sky-Whale-Bot"
-version = "1.0.0"
+version = "1.1.0"
 description = ""
 authors = ["kiryanchi <kiryanchi@naver.com>"]
 readme = "README.md"
-packages = [{include = "discord_music_player_bot"}]
+packages = [{ include = "discord_music_player_bot" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -12,8 +12,7 @@ youtube-search-python = "^1.6.6"
 sqlalchemy = "^2.0.4"
 rich = "^13.3.1"
 yt-dlp = "^2023.3.4"
-discord-py = {extras = ["voice"], version = "^2.2.2"}
-wavelink = "^2.1.0"
+discord-py = { extras = ["voice"], version = "^2.2.2" }
 python-dotenv = "^1.0.0"
 
 

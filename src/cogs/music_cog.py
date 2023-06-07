@@ -50,7 +50,7 @@ class MusicCog(commands.GroupCog, name="고래"):
                 return
 
             if message.author.voice is None:
-                await message.reply("음성 채널에 들어가서 사용해주세요.", delete_after=5)
+                await message.reply("음성 채널에 들어가서 사용해주세요.", delete_after=5, silent=True)
                 await message.delete()
                 return
 
@@ -70,7 +70,7 @@ class MusicCog(commands.GroupCog, name="고래"):
         if music := self.bot.musics.get(interaction.guild_id, None):
             if interaction.user.voice is None:
                 await interaction.response.send_message(
-                    "음성 채널에 들어가서 사용해주세요.", delete_after=5
+                    "음성 채널에 들어가서 사용해주세요.", delete_after=5, silent=True
                 )
                 return
 

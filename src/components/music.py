@@ -61,12 +61,12 @@ class Music:
     async def pause(self, interaction: Interaction):
         if self.is_playing:
             await interaction.response.send_message(
-                f"<@{interaction.user.id}> 님이 재생 했습니다.", delete_after=3
+                f"<@{interaction.user.id}> 님이 재생 했습니다.", delete_after=3, silent=True
             )
             logger.info(f"{get_info(self.guild)} 노래 일시정지 해제")
         else:
             await interaction.response.send_message(
-                f"<@{interaction.user.id}> 님이 일시정지 했습니다.", delete_after=3
+                f"<@{interaction.user.id}> 님이 일시정지 했습니다.", delete_after=3, silent=True
             )
             logger.info(f"{get_info(self.guild)} 노래 일시정지")
         if self.player:
@@ -77,11 +77,11 @@ class Music:
         logger.debug(f"{get_info(self.guild)} Skip Interaction")
         if self.is_loop:
             await interaction.response.send_message(
-                "`스킵`을 하려면 `반복`을 해제해주세요", delete_after=5
+                "`스킵`을 하려면 `반복`을 해제해주세요", delete_after=5, silent=True
             )
         else:
             await interaction.response.send_message(
-                f"<@{interaction.user.id}> 님이 노래를 `스킵`했습니다.", delete_after=3
+                f"<@{interaction.user.id}> 님이 노래를 `스킵`했습니다.", delete_after=3, silent=True
             )
             logger.info(f"{get_info(self.guild)} 노래 스킵")
             if self.player:
@@ -91,7 +91,7 @@ class Music:
         logger.debug(f"{get_info(self.guild)} Shuffle Interaction")
         logger.info(f"{get_info(self.guild)} 재생 목록을 흔듦")
         await interaction.response.send_message(
-            f"<@{interaction.user.id}> 님이 재생목록을 흔들었습니다.", delete_after=3
+            f"<@{interaction.user.id}> 님이 재생목록을 흔들었습니다.", delete_after=3, silent=True
         )
         await self.playlist.shuffle()
 
@@ -100,7 +100,7 @@ class Music:
         logger.info(f"{get_info(self.guild)} 하늘고래 초기화")
         if interaction:
             await interaction.response.send_message(
-                f"<@{interaction.user.id}> 님이 하늘 고래를 죽였습니다...", delete_after=5
+                f"<@{interaction.user.id}> 님이 하늘 고래를 죽였습니다...", delete_after=5, silent=True
             )
         self._loop = False
         if self.player:
@@ -108,6 +108,7 @@ class Music:
             await self.delete_player()
         else:
             await self.playlist.clear()
+        await self.channel.purge(after=self.playlist.message)
 
     async def help(self, interaction: Interaction = None):
         logger.info(f"{get_info(self.guild)} 도움말 요청")
@@ -143,12 +144,12 @@ class Music:
         logger.debug(f"{get_info(self.guild)} Loop Interaction")
         if self.is_loop:
             await interaction.response.send_message(
-                f"<@{interaction.user.id}> 님이 반복을 해제했습니다.", delete_after=3
+                f"<@{interaction.user.id}> 님이 반복을 해제했습니다.", delete_after=3, silent=True
             )
             logger.info(f"{get_info(self.guild)} 노래 반복 해제")
         else:
             await interaction.response.send_message(
-                f"<@{interaction.user.id}> 님이 반복을 설정했습니다.", delete_after=3
+                f"<@{interaction.user.id}> 님이 반복을 설정했습니다.", delete_after=3, silent=True
             )
             logger.info(f"{get_info(self.guild)} 노래 반복 설정")
         if self.player:
