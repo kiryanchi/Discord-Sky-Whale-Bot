@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self, Optional
 
-from discord import ui, ButtonStyle
+from discord import ui, ButtonStyle, errors
 
 from setting import INIT_MSG
 from src.components.player import Player
@@ -165,7 +165,12 @@ class Music:
 
     @staticmethod
     async def new(bot: ExtendedBot, channel: TextChannel) -> Self:
-        await channel.purge()
+        try:
+            await channel.purge()
+        except errors.Forbidden:
+            logger.debug(f"{get_info(channel.guild)} 길드에 관리자 권한이 없음!")
+            await channel.send(content="하늘 고래에게 **관리자** 권한을 부여한 뒤, `시작` 혹은 `초기화` 명령어를 사용해주세요!")
+            return
         message = await channel.send(content=INIT_MSG, silent=True)
         playlist = await Playlist.new(message)
         music = Music(bot, channel, message, playlist)
